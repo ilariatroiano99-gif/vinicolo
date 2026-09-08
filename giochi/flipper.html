@@ -297,7 +297,7 @@ var G = {
   carica:0, caricando:false,
   vinoFatti:0, salvagente:false, salvagenteUsato:false,
   rampeAccese:0, contoT:0, conto:null,
-  tilt:false, spinte:0, spintaT:0, scossa:0,
+  tilt:false, spinte:0, spintaT:0, scossa:0, orbita:true,
   messaggi:[], lampo:0
 };
 
@@ -420,8 +420,10 @@ function abbatti(t){
 function accendiLuceArco(l){
   if(l.on) return;
   l.on = true;
-  segna(250);
+  segna(600);
   beep(740, 0.05, "sine", 0.04);
+  var restano = luciArco.filter(function(x){ return !x.on; }).length;
+  if(restano > 0) avviso(restano === 1 ? "Ancora un giro" : restano + " giri alla bottiglia");
   if(luciArco.every(function(x){ return x.on; })){
     G.rampeAccese = 20;
     segna(5000);
@@ -617,10 +619,15 @@ function passo(dt){
     }
 
     // ── luci e bocche delle rampe (zone, non collisioni) ──
-    for(var l2 = 0; l2 < luciArco.length; l2++){
-      var L = luciArco[l2];
-      if(Math.abs(b.x - L.x) < 15 && Math.abs(b.y - L.y) < 15) accendiLuceArco(L);
+    // un giro completo dell'arco accende UNA etichetta, non tutte:
+    // passandoci sopra si prendevano tutte e cinque a ogni lancio
+    if(b.y < ARCO.cy - ARCO.rIn + 24 && G.orbita){
+      G.orbita = false;
+      for(var l2 = 0; l2 < luciArco.length; l2++){
+        if(!luciArco[l2].on){ accendiLuceArco(luciArco[l2]); break; }
+      }
     }
+    if(b.y > 340) G.orbita = true;
     for(var s2 = 0; s2 < fette.length; s2++){
       var F = fette[s2];
       if((b.x-F.x)*(b.x-F.x) + (b.y-F.y)*(b.y-F.y) < 210) accendiFetta(F);
@@ -739,7 +746,7 @@ function nuovaPartita(){
   G.punti = 0; G.molt = 1; G.tappi = 3;
   G.vinoFatti = 0; G.salvagente = false; G.salvagenteUsato = false;
   G.rampeAccese = 0; G.conto = null; G.contoT = 22;
-  G.tilt = false; G.spinte = 0; G.messaggi = [];
+  G.tilt = false; G.spinte = 0; G.messaggi = []; G.orbita = true;
   costruisciTavolo();
   document.getElementById("overlay").classList.add("hide");
   document.getElementById("endOverlay").classList.add("hide");
@@ -749,15 +756,35 @@ function nuovaPartita(){
 
 /* ══════════════════════════════════════════════════════════════════
    DISEGNO
+   Una sola regola: la luce viene da sopra a sinistra. Ogni oggetto ha
+   la sua ombra dalla stessa parte, un bordo scuro che lo stacca dal
+   piano e una luce sul lato illuminato. E' quello che fa sembrare le
+   cose appoggiate sul tavolo invece che stampate sopra.
    ══════════════════════════════════════════════════════════════════ */
 
+var LUX = {x:-0.44, y:-0.62};
+var BORDO = "rgba(16,6,11,.72)";
+
+function ombra(dx, dy, sfoca, alfa, fn){
+  cx.save();
+  cx.shadowColor = "rgba(6,2,5," + alfa + ")";
+  cx.shadowBlur = sfoca; cx.shadowOffsetX = dx; cx.shadowOffsetY = dy;
+  fn();
+  cx.restore();
+}
+function sfera(x, y, r, chiaro, scuro){
+  var g = cx.createRadialGradient(x + LUX.x*r*0.5, y + LUX.y*r*0.5, r*0.06, x, y, r*1.02);
+  g.addColorStop(0, chiaro); g.addColorStop(1, scuro);
+  return g;
+}
 function grad(x0,y0,x1,y1,a,b){
   var g = cx.createLinearGradient(x0,y0,x1,y1);
   g.addColorStop(0,a); g.addColorStop(1,b); return g;
 }
+function contorno(w, col){ cx.strokeStyle = col || BORDO; cx.lineWidth = w || 1.7; cx.stroke(); }
 
+/* ── la cassa ───────────────────────────────────────────────────── */
 function disegnaCassa(){
-  // la cassa di legno che circonda il tavolo
   cx.fillStyle = C.cassa;
   cx.fillRect(0, 0, W, H);
   var g = cx.createLinearGradient(0, 0, W, 0);
@@ -766,150 +793,236 @@ function disegnaCassa(){
   cx.fillRect(0, 0, W, H);
 }
 
+/* ── il piano di gioco ──────────────────────────────────────────── */
 function disegnaPiano(){
   cx.save();
-  cx.beginPath();
-  cx.rect(10, 10, W-20, H-20);
-  cx.clip();
+  cx.beginPath(); cx.rect(10, 10, W-20, H-20); cx.clip();
 
-  // fondo bordeaux profondo
-  var g = cx.createRadialGradient(260, 300, 40, 260, 620, 620);
-  g.addColorStop(0, "#4a1a2e");
-  g.addColorStop(0.55, C.fondo);
-  g.addColorStop(1, C.fondoScuro);
+  var g = cx.createRadialGradient(200, 260, 40, 260, 640, 660);
+  g.addColorStop(0, "#5b2340");
+  g.addColorStop(0.42, C.fondo);
+  g.addColorStop(1, "#1c0a14");
   cx.fillStyle = g;
   cx.fillRect(10, 10, W-20, H-20);
 
-  // venature del legno
-  cx.strokeStyle = "rgba(190,107,52,.09)";
-  cx.lineWidth = 1.4;
-  for(var i = 0; i < 22; i++){
-    var y0 = 20 + i*42;
-    cx.beginPath();
-    cx.moveTo(10, y0);
-    for(var x = 10; x <= W-10; x += 26){
-      cx.lineTo(x, y0 + Math.sin((x + i*57) * 0.021) * 7 + Math.sin(x*0.006 + i) * 3);
+  // legno sotto la vernice
+  cx.strokeStyle = "rgba(190,107,52,.075)"; cx.lineWidth = 1.5;
+  for(var i = 0; i < 24; i++){
+    var y0 = 16 + i*38;
+    cx.beginPath(); cx.moveTo(10, y0);
+    for(var x = 10; x <= W-10; x += 24){
+      cx.lineTo(x, y0 + Math.sin((x + i*61)*0.02)*6 + Math.sin(x*0.007 + i)*3);
     }
     cx.stroke();
   }
 
   // la tovaglietta di carta sotto il tagliere
   cx.save();
-  cx.translate(236, 626); cx.rotate(-0.06);
-  cx.fillStyle = "rgba(230,220,196,.10)";
-  cx.fillRect(-166, -152, 332, 300);
-  cx.strokeStyle = "rgba(230,220,196,.18)"; cx.lineWidth = 1;
-  cx.strokeRect(-166, -152, 332, 300);
+  cx.translate(236, 636); cx.rotate(-0.055);
+  cx.fillStyle = "rgba(230,220,196,.085)";
+  cx.fillRect(-172, -150, 344, 292);
+  cx.strokeStyle = "rgba(230,220,196,.16)"; cx.lineWidth = 1;
+  cx.strokeRect(-172, -150, 344, 292);
+  cx.setLineDash([5,6]);
+  cx.strokeStyle = "rgba(230,220,196,.12)";
+  cx.strokeRect(-162, -140, 324, 272);
+  cx.setLineDash([]);
+  cx.restore();
+
+  // gli anelli che lascia il bicchiere sulla tavola
+  [[92,236,30],[404,214,26],[128,596,34],[368,568,28],[210,760,24],[300,700,30],[60,700,22]]
+   .forEach(function(a){
+    cx.save();
+    cx.strokeStyle = "rgba(141,51,85,.20)"; cx.lineWidth = 3.2;
+    cx.beginPath(); cx.arc(a[0], a[1], a[2], 0, Math.PI*2); cx.stroke();
+    cx.strokeStyle = "rgba(232,178,74,.07)"; cx.lineWidth = 1.2;
+    cx.beginPath(); cx.arc(a[0], a[1], a[2]-3.4, 0, Math.PI*2); cx.stroke();
+    cx.restore();
+  });
+
+  // tralcio dipinto, in basso
+  cx.save();
+  cx.strokeStyle = "rgba(47,107,70,.20)"; cx.lineWidth = 2.4; cx.lineCap = "round";
+  cx.beginPath();
+  cx.moveTo(56, 812); cx.bezierCurveTo(130, 764, 190, 806, 236, 776);
+  cx.bezierCurveTo(286, 806, 344, 764, 420, 812);
+  cx.stroke();
+  cx.fillStyle = "rgba(88,35,60,.24)";
+  [[96,790],[150,788],[204,790],[268,790],[322,788],[380,792]].forEach(function(p){
+    for(var k = 0; k < 3; k++){
+      cx.beginPath(); cx.arc(p[0] + (k-1)*6, p[1] + (k===1?6:0), 4.2, 0, Math.PI*2); cx.fill();
+    }
+  });
   cx.restore();
 
   cx.restore();
 }
 
+/* ── i canali di legno ──────────────────────────────────────────── */
 function disegnaCanali(){
-  // il canale del bancone: fascia larga fra i due archi
   cx.save();
   cx.beginPath();
   cx.arc(ARCO.cx, ARCO.cy, (ARCO.rOut+ARCO.rIn)/2, Math.PI, Math.PI*2);
   cx.lineWidth = ARCO.rOut - ARCO.rIn;
-  cx.strokeStyle = grad(16,300,504,300,"#3f2418","#57351f");
+  cx.strokeStyle = grad(16,300,504,300,"#3a2116","#5d3922");
   cx.stroke();
-
-  // legno del bancone: doghe
+  // doghe
   cx.lineWidth = 1;
-  cx.strokeStyle = "rgba(20,10,6,.35)";
-  for(var g = 182; g < 360; g += 9){
+  cx.strokeStyle = "rgba(16,8,4,.4)";
+  for(var g = 182; g < 360; g += 8){
     var t = g*Math.PI/180;
     cx.beginPath();
     cx.moveTo(ARCO.cx + Math.cos(t)*ARCO.rIn, ARCO.cy + Math.sin(t)*ARCO.rIn);
     cx.lineTo(ARCO.cx + Math.cos(t)*ARCO.rOut, ARCO.cy + Math.sin(t)*ARCO.rOut);
     cx.stroke();
   }
+  // ombra interna del canale, dalla parte della luce
+  cx.lineWidth = 9;
+  cx.strokeStyle = "rgba(0,0,0,.28)";
+  cx.beginPath(); cx.arc(ARCO.cx, ARCO.cy, ARCO.rOut - 5, Math.PI, Math.PI*2); cx.stroke();
+  cx.strokeStyle = "rgba(255,220,170,.09)";
+  cx.beginPath(); cx.arc(ARCO.cx, ARCO.cy, ARCO.rIn + 5, Math.PI, Math.PI*2); cx.stroke();
   cx.restore();
 
-  // canale di lancio, a destra
-  cx.fillStyle = grad(456,300,504,300,"#3f2418","#57351f");
-  cx.fillRect(456, 300, 48, 552);
-  cx.fillStyle = "rgba(20,10,6,.3)";
-  for(var y = 306; y < 852; y += 9){ cx.fillRect(456, y, 48, 1); }
+  // canale di lancio
+  cx.fillStyle = grad(456,300,504,300,"#3a2116","#5d3922");
+  cx.fillRect(456, 300, 48, 556);
+  cx.fillStyle = "rgba(16,8,4,.32)";
+  for(var y = 306; y < 856; y += 8){ cx.fillRect(456, y, 48, 1); }
+  cx.fillStyle = "rgba(0,0,0,.26)"; cx.fillRect(456, 300, 7, 556);
+  cx.fillStyle = "rgba(255,220,170,.08)"; cx.fillRect(497, 300, 7, 556);
 
   // canale sinistro
-  cx.fillStyle = grad(16,300,64,300,"#57351f","#3f2418");
-  cx.fillRect(16, 300, 48, 158);
+  cx.fillStyle = grad(16,300,64,300,"#5d3922","#3a2116");
+  cx.fillRect(16, 300, 48, 132);
+  cx.fillStyle = "rgba(16,8,4,.32)";
+  for(var y2 = 306; y2 < 432; y2 += 8){ cx.fillRect(16, y2, 48, 1); }
 }
 
+/* ── guide di metallo ───────────────────────────────────────────── */
 function rail(ax, ay, bx, by, w){
-  cx.lineCap = "round";
-  cx.strokeStyle = C.railOmbra; cx.lineWidth = (w||5) + 2;
-  cx.beginPath(); cx.moveTo(ax, ay+1.5); cx.lineTo(bx, by+1.5); cx.stroke();
-  cx.strokeStyle = C.rail; cx.lineWidth = (w||5);
+  w = w || 5;
+  cx.save(); cx.lineCap = "round";
+  cx.strokeStyle = "rgba(6,2,5,.55)"; cx.lineWidth = w + 3;
+  cx.beginPath(); cx.moveTo(ax, ay+3); cx.lineTo(bx, by+3); cx.stroke();
+  cx.strokeStyle = "#6f6555"; cx.lineWidth = w;
   cx.beginPath(); cx.moveTo(ax, ay); cx.lineTo(bx, by); cx.stroke();
+  cx.strokeStyle = "#e6ddcc"; cx.lineWidth = Math.max(1.4, w*0.42);
+  cx.beginPath(); cx.moveTo(ax, ay - w*0.22); cx.lineTo(bx, by - w*0.22); cx.stroke();
+  cx.restore();
 }
-
 function railArco(ccx, ccy, rad, da, a, w){
-  cx.lineCap = "round";
-  cx.strokeStyle = C.railOmbra; cx.lineWidth = (w||5)+2;
-  cx.beginPath(); cx.arc(ccx, ccy+1.5, rad, da*Math.PI/180, a*Math.PI/180); cx.stroke();
-  cx.strokeStyle = C.rail; cx.lineWidth = (w||5);
+  w = w || 5;
+  cx.save(); cx.lineCap = "round";
+  cx.strokeStyle = "rgba(6,2,5,.55)"; cx.lineWidth = w + 3;
+  cx.beginPath(); cx.arc(ccx, ccy+3, rad, da*Math.PI/180, a*Math.PI/180); cx.stroke();
+  cx.strokeStyle = "#6f6555"; cx.lineWidth = w;
   cx.beginPath(); cx.arc(ccx, ccy, rad, da*Math.PI/180, a*Math.PI/180); cx.stroke();
+  cx.strokeStyle = "#e6ddcc"; cx.lineWidth = Math.max(1.4, w*0.42);
+  cx.beginPath(); cx.arc(ccx, ccy - w*0.22, rad, da*Math.PI/180, a*Math.PI/180); cx.stroke();
+  cx.restore();
 }
 
+/* ── il tagliere ────────────────────────────────────────────────── */
+var SALUMI = ["#b8556b","#d98a86","#c9a24a","#a8455c","#e0c07a","#b8556b","#d98a86","#c9a24a"];
 function disegnaTagliere(){
   cx.save();
   cx.translate(236, 626);
 
-  // il tagliere di legno
-  var g = cx.createRadialGradient(-20, -24, 8, 0, 0, 88);
-  g.addColorStop(0, C.legnoChiaro);
-  g.addColorStop(0.7, C.legno);
-  g.addColorStop(1, "#41250f");
+  ombra(4, 8, 14, 0.6, function(){
+    cx.fillStyle = "#3a2110";
+    cx.beginPath(); cx.arc(0, 0, 86, 0, Math.PI*2); cx.fill();
+  });
+
+  // spessore del legno
+  cx.fillStyle = "#38200f";
+  cx.beginPath(); cx.arc(0, 5, 86, 0, Math.PI*2); cx.fill();
+
+  var g = cx.createRadialGradient(-26, -30, 8, 0, 0, 90);
+  g.addColorStop(0, "#8a5730"); g.addColorStop(0.68, C.legno); g.addColorStop(1, "#40240f");
   cx.fillStyle = g;
   cx.beginPath(); cx.arc(0, 0, 84, 0, Math.PI*2); cx.fill();
 
-  cx.strokeStyle = "rgba(20,10,4,.55)"; cx.lineWidth = 3;
-  cx.beginPath(); cx.arc(0, 0, 84, 0, Math.PI*2); cx.stroke();
-
-  // venature
-  cx.strokeStyle = "rgba(65,37,15,.5)"; cx.lineWidth = 1.2;
-  for(var i = -3; i <= 3; i++){
-    cx.beginPath();
-    cx.arc(-140 + i*8, 0, 150, -0.55, 0.55);
-    cx.stroke();
+  cx.save();
+  cx.beginPath(); cx.arc(0, 0, 84, 0, Math.PI*2); cx.clip();
+  cx.strokeStyle = "rgba(58,32,14,.45)"; cx.lineWidth = 1.4;
+  for(var i = -4; i <= 4; i++){
+    cx.beginPath(); cx.arc(-150 + i*9, 0, 160, -0.5, 0.5); cx.stroke();
   }
+  cx.restore();
 
-  // le fette, corona di luci
+  cx.beginPath(); cx.arc(0, 0, 84, 0, Math.PI*2); contorno(2.4);
+  cx.strokeStyle = "rgba(255,222,180,.16)"; cx.lineWidth = 2;
+  cx.beginPath(); cx.arc(0, 0, 80, Math.PI*1.05, Math.PI*1.75); cx.stroke();
+
+  // le fette, che compaiono davvero sul tagliere
   fette.forEach(function(f, i){
     var a = f.ang, x = Math.cos(a)*100, y = Math.sin(a)*100;
     cx.save();
     cx.translate(x, y); cx.rotate(a + Math.PI/2);
     if(f.on){
-      cx.shadowColor = C.oro; cx.shadowBlur = 12;
-      cx.fillStyle = C.oroChiaro;
+      ombra(1.5, 2.5, 4, 0.55, function(){
+        cx.fillStyle = SALUMI[i % SALUMI.length];
+        cx.beginPath(); cx.ellipse(0, 0, 8.5, 6, 0, 0, Math.PI*2); cx.fill();
+      });
+      cx.fillStyle = "rgba(255,255,255,.28)";
+      cx.beginPath(); cx.ellipse(-2.4, -1.8, 3, 1.9, -0.5, 0, Math.PI*2); cx.fill();
+      cx.beginPath(); cx.ellipse(0, 0, 8.5, 6, 0, 0, Math.PI*2); contorno(1.2, "rgba(40,14,22,.6)");
     } else {
-      cx.fillStyle = "rgba(244,237,226,.16)";
+      cx.fillStyle = "rgba(20,8,12,.42)";
+      cx.beginPath(); cx.ellipse(0, 0, 7, 4.8, 0, 0, Math.PI*2); cx.fill();
+      cx.strokeStyle = "rgba(244,237,226,.26)"; cx.lineWidth = 1;
+      cx.beginPath(); cx.ellipse(0, 0, 7, 4.8, 0, 0, Math.PI*2); cx.stroke();
     }
-    cx.beginPath();
-    cx.ellipse(0, 0, 7.5, 5, 0, 0, Math.PI*2);
-    cx.fill();
-    cx.shadowBlur = 0;
-    cx.strokeStyle = f.on ? "rgba(88,35,60,.7)" : "rgba(244,237,226,.22)";
-    cx.lineWidth = 1;
-    cx.stroke();
     cx.restore();
   });
 
-  // scritta al centro
-  cx.fillStyle = "rgba(244,237,226,.34)";
-  cx.font = "italic 15px Georgia, serif";
-  cx.textAlign = "center"; cx.textBaseline = "middle";
-  cx.fillText("tagliere", 0, -4);
   var n = fette.filter(function(f){ return f.on; }).length;
-  cx.font = "700 20px Georgia, serif";
-  cx.fillStyle = n === 16 ? C.oro : "rgba(244,237,226,.5)";
-  cx.fillText(n + " / 16", 0, 20);
 
+  // il coltello appoggiato sul tagliere
+  cx.save();
+  cx.rotate(-0.42);
+  cx.fillStyle = "rgba(6,2,5,.4)";
+  cx.beginPath(); cx.ellipse(2, 46, 44, 7, 0, 0, Math.PI*2); cx.fill();
+  // lama
+  cx.beginPath();
+  cx.moveTo(-46, 40); cx.lineTo(12, 36); cx.lineTo(16, 44); cx.lineTo(-46, 48); cx.closePath();
+  cx.fillStyle = grad(-46,36,-46,48,"#e9e2d4","#9a9284"); cx.fill();
+  contorno(1.2);
+  // manico
+  cx.beginPath();
+  cx.moveTo(16, 36); cx.lineTo(48, 35); cx.lineTo(48, 47); cx.lineTo(16, 46); cx.closePath();
+  cx.fillStyle = grad(16,35,16,47,"#7a4a22","#3d2210"); cx.fill();
+  contorno(1.2);
+  cx.restore();
+
+  // alone caldo quando il tagliere si riempie
+  if(n > 0){
+    var ag = cx.createRadialGradient(0, 0, 40, 0, 0, 104);
+    ag.addColorStop(0, "rgba(232,178,74,0)");
+    ag.addColorStop(1, "rgba(232,178,74," + (0.05 + n/16*0.22) + ")");
+    cx.fillStyle = ag;
+    cx.beginPath(); cx.arc(0, 0, 104, 0, Math.PI*2); cx.fill();
+  }
+
+  cx.textAlign = "center"; cx.textBaseline = "middle";
+  cx.fillStyle = "rgba(24,10,6,.5)";
+  cx.font = "italic 15px Georgia, serif";
+  cx.fillText("tagliere", 0, -13);
+  cx.fillStyle = "rgba(246,232,206,.6)";
+  cx.fillText("tagliere", 0, -14);
+  cx.fillStyle = "rgba(20,8,12,.42)";
+  cx.beginPath();
+  if(cx.roundRect) cx.roundRect(-33, 2, 66, 26, 13); else cx.rect(-33, 2, 66, 26);
+  cx.fill();
+  cx.strokeStyle = n === 16 ? C.oro : "rgba(246,232,206,.3)"; cx.lineWidth = 1.4; cx.stroke();
+  cx.font = "700 19px Georgia, serif";
+  cx.fillStyle = n === 16 ? C.oroChiaro : "rgba(246,232,206,.8)";
+  cx.fillText(n + " / 16", 0, 16);
   cx.restore();
 }
 
+/* ── le rampe, con il pianale di plastica ───────────────────────── */
 function bordoRampa(via, d){
   var pts = [];
   for(var i = 0; i < via.length; i++){
@@ -924,51 +1037,66 @@ function tracciato(pts){
   cx.moveTo(pts[0].x, pts[0].y);
   for(var i = 1; i < pts.length; i++) cx.lineTo(pts[i].x, pts[i].y);
 }
+function pianale(A, B){
+  cx.beginPath();
+  cx.moveTo(A[0].x, A[0].y);
+  for(var i = 1; i < A.length; i++) cx.lineTo(A[i].x, A[i].y);
+  for(var j = B.length-1; j >= 0; j--) cx.lineTo(B[j].x, B[j].y);
+  cx.closePath();
+}
 
 function disegnaRampe(){
   var acc = G.rampeAccese > 0;
   RAMPE.forEach(function(R){
     var via = R.via;
-    var A = bordoRampa(via, 8.5), B = bordoRampa(via, -8.5);
+    var A = bordoRampa(via, 10), B = bordoRampa(via, -10);
     cx.save();
     cx.lineCap = "round"; cx.lineJoin = "round";
 
-    // ombra sul piano
-    cx.strokeStyle = "rgba(10,4,8,.42)"; cx.lineWidth = 4;
-    cx.save(); cx.translate(3, 5);
-    tracciato(A); cx.stroke(); tracciato(B); cx.stroke();
+    // ombra portata sul piano
+    cx.save(); cx.translate(5, 9);
+    cx.fillStyle = "rgba(6,2,5,.45)";
+    pianale(A, B); cx.fill();
     cx.restore();
 
-    if(R.stile === "pianale"){
-      // il forno: pianale di terracotta fra i due bordi
-      cx.beginPath();
-      cx.moveTo(A[0].x, A[0].y);
-      for(var i = 1; i < A.length; i++) cx.lineTo(A[i].x, A[i].y);
-      for(var j = B.length-1; j >= 0; j--) cx.lineTo(B[j].x, B[j].y);
-      cx.closePath();
-      var g = cx.createLinearGradient(300, 250, 420, 540);
-      g.addColorStop(0, acc ? "rgba(232,178,74,.45)" : "rgba(190,107,52,.30)");
-      g.addColorStop(1, acc ? "rgba(232,178,74,.22)" : "rgba(190,107,52,.14)");
-      cx.fillStyle = g; cx.fill();
+    // il pianale di plastica colorata
+    pianale(A, B);
+    var g;
+    if(R.nome === "cavatappi"){
+      g = cx.createLinearGradient(40, 560, 220, 240);
+      g.addColorStop(0, acc ? "rgba(244,208,138,.92)" : "rgba(46,126,119,.82)");
+      g.addColorStop(1, acc ? "rgba(232,178,74,.86)" : "rgba(24,84,80,.86)");
+    } else {
+      g = cx.createLinearGradient(440, 540, 280, 240);
+      g.addColorStop(0, acc ? "rgba(244,208,138,.92)" : "rgba(207,120,58,.86)");
+      g.addColorStop(1, acc ? "rgba(232,178,74,.86)" : "rgba(150,66,30,.88)");
     }
+    cx.fillStyle = g; cx.fill();
+    contorno(2.2);
 
-    // traversine
-    cx.strokeStyle = acc ? "rgba(244,208,138,.75)" : "rgba(216,205,187,.35)";
-    cx.lineWidth = 2;
-    for(var k = 0; k < via.length; k++){
-      cx.beginPath(); cx.moveTo(A[k].x, A[k].y); cx.lineTo(B[k].x, B[k].y); cx.stroke();
-      if(k < via.length-1){
-        cx.beginPath();
-        cx.moveTo((A[k].x+A[k+1].x)/2, (A[k].y+A[k+1].y)/2);
-        cx.lineTo((B[k].x+B[k+1].x)/2, (B[k].y+B[k+1].y)/2);
-        cx.stroke();
+    // luce sul bordo alto
+    cx.strokeStyle = "rgba(255,245,225,.4)"; cx.lineWidth = 2;
+    tracciato(A); cx.stroke();
+    cx.strokeStyle = "rgba(0,0,0,.3)"; cx.lineWidth = 2;
+    tracciato(B); cx.stroke();
+
+    // le traversine stampate
+    cx.strokeStyle = acc ? "rgba(90,40,10,.5)" : "rgba(255,246,230,.28)";
+    cx.lineWidth = 2.4;
+    for(var k = 0; k < via.length-1; k++){
+      for(var q = 0.25; q < 1; q += 0.5){
+        var ax = A[k].x + (A[k+1].x-A[k].x)*q, ay = A[k].y + (A[k+1].y-A[k].y)*q;
+        var bx = B[k].x + (B[k+1].x-B[k].x)*q, by = B[k].y + (B[k+1].y-B[k].y)*q;
+        cx.beginPath(); cx.moveTo(ax, ay); cx.lineTo(bx, by); cx.stroke();
       }
     }
 
-    // i due fili portanti
-    cx.strokeStyle = acc ? C.oro : C.railOmbra; cx.lineWidth = 5;
+    // le sponde di filo, sopra al pianale
+    cx.strokeStyle = "rgba(6,2,5,.45)"; cx.lineWidth = 6;
+    cx.save(); cx.translate(1.5, 3); tracciato(A); cx.stroke(); tracciato(B); cx.stroke(); cx.restore();
+    cx.strokeStyle = "#6f6555"; cx.lineWidth = 4.2;
     tracciato(A); cx.stroke(); tracciato(B); cx.stroke();
-    cx.strokeStyle = acc ? C.oroChiaro : C.rail; cx.lineWidth = 2.6;
+    cx.strokeStyle = "#e6ddcc"; cx.lineWidth = 1.8;
     tracciato(A); cx.stroke(); tracciato(B); cx.stroke();
     cx.restore();
 
@@ -976,106 +1104,125 @@ function disegnaRampe(){
     var bo = R.bocca;
     cx.save();
     cx.translate(bo.x, bo.y);
-    cx.fillStyle = "rgba(6,2,4,.55)";
+    ombra(2, 5, 8, 0.6, function(){
+      cx.fillStyle = "#150810";
+      cx.beginPath(); cx.arc(0, 0, bo.r, 0, Math.PI*2); cx.fill();
+    });
+    var gb = cx.createRadialGradient(0, -3, 2, 0, 0, bo.r);
+    gb.addColorStop(0, "#0a0409"); gb.addColorStop(1, "#2a1520");
+    cx.fillStyle = gb;
     cx.beginPath(); cx.arc(0, 0, bo.r, 0, Math.PI*2); cx.fill();
-    if(acc){ cx.shadowColor = C.oro; cx.shadowBlur = 18; }
-    cx.strokeStyle = acc ? C.oro : "rgba(216,205,187,.6)";
-    cx.lineWidth = 3;
+    if(acc){ cx.shadowColor = C.oro; cx.shadowBlur = 20; }
+    cx.strokeStyle = acc ? C.oro : "#cfc4b1"; cx.lineWidth = 3.4;
     cx.beginPath(); cx.arc(0, 0, bo.r, 0, Math.PI*2); cx.stroke();
     cx.shadowBlur = 0;
-    // freccia che indica il tiro
-    cx.fillStyle = acc ? C.oroChiaro : "rgba(216,205,187,.55)";
-    cx.beginPath();
-    cx.moveTo(0, -8); cx.lineTo(6, 3); cx.lineTo(-6, 3); cx.closePath(); cx.fill();
-    cx.fillStyle = acc ? C.oro : "rgba(216,205,187,.5)";
+    cx.strokeStyle = "rgba(255,250,240,.55)"; cx.lineWidth = 1.4;
+    cx.beginPath(); cx.arc(0, -1.4, bo.r, Math.PI*1.08, Math.PI*1.85); cx.stroke();
+    // freccia
+    cx.fillStyle = acc ? C.oroChiaro : "rgba(230,221,204,.72)";
+    cx.beginPath(); cx.moveTo(0, -9); cx.lineTo(6.5, 3.5); cx.lineTo(-6.5, 3.5); cx.closePath(); cx.fill();
+    cx.fillStyle = acc ? C.oro : "rgba(230,221,204,.6)";
     cx.font = "700 8px -apple-system, Helvetica, sans-serif";
     cx.textAlign = "center"; cx.textBaseline = "middle";
-    cx.fillText(acc ? "JACKPOT" : R.nome.toUpperCase(), 0, bo.r + 10);
+    cx.fillText(acc ? "JACKPOT" : R.nome.toUpperCase(), 0, bo.r + 11);
     cx.restore();
   });
 }
 
+/* ── i calici: paraurti a fungo ─────────────────────────────────── */
 function disegnaCalici(){
   respinte.forEach(function(c){
     var f = Math.max(0, c.flash);
     var q = (c.colpi % 12) / 12;
+    var r = c.r;
     cx.save();
     cx.translate(c.x, c.y);
 
     // ombra a terra
-    cx.fillStyle = "rgba(8,3,6,.5)";
-    cx.beginPath(); cx.arc(0, 4, c.r + 2, 0, Math.PI*2); cx.fill();
+    cx.fillStyle = "rgba(6,2,5,.5)";
+    cx.beginPath(); cx.ellipse(3.5, 8, r+2, r-1, 0, 0, Math.PI*2); cx.fill();
 
-    // gonna esterna, crema
-    if(f > 0){ cx.shadowColor = C.oro; cx.shadowBlur = 30 * f; }
-    var g = cx.createRadialGradient(-7, -9, 3, 0, 0, c.r);
-    g.addColorStop(0, "#fbf6ec"); g.addColorStop(0.62, C.crema); g.addColorStop(1, "#a99c88");
-    cx.fillStyle = g;
-    cx.beginPath(); cx.arc(0, 0, c.r, 0, Math.PI*2); cx.fill();
+    // gonna: il piede del calice
+    cx.fillStyle = sfera(0, 0, r+2, "#efe6d6", "#7d7263");
+    cx.beginPath(); cx.arc(0, 2, r+2, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(0, 2, r+2, 0, Math.PI*2); contorno(1.8);
+
+    // ghiera di metallo
+    if(f > 0){ cx.shadowColor = C.oro; cx.shadowBlur = 26*f; }
+    cx.strokeStyle = grad(-r,-r,r,r,"#f6e6bd","#96762f"); cx.lineWidth = 5;
+    cx.beginPath(); cx.arc(0, 0, r-2, 0, Math.PI*2); cx.stroke();
     cx.shadowBlur = 0;
+    cx.strokeStyle = "rgba(255,250,235,.7)"; cx.lineWidth = 1.6;
+    cx.beginPath(); cx.arc(0, -1, r-2, Math.PI*1.02, Math.PI*1.8); cx.stroke();
 
-    // anello bordeaux
-    cx.strokeStyle = f > 0 ? C.vinoVivo : C.vino; cx.lineWidth = 5;
-    cx.beginPath(); cx.arc(0, 0, c.r - 4, 0, Math.PI*2); cx.stroke();
-
-    // anello oro
-    cx.strokeStyle = f > 0 ? C.oroChiaro : "rgba(232,178,74,.75)"; cx.lineWidth = 2;
-    cx.beginPath(); cx.arc(0, 0, c.r - 8.5, 0, Math.PI*2); cx.stroke();
-
-    // il vino nel calice, visto dall'alto
-    var rin = c.r - 11;
-    var gv = cx.createRadialGradient(-3, -4, 1, 0, 0, rin);
-    gv.addColorStop(0, "#a13e63"); gv.addColorStop(1, "#3d152a");
-    cx.fillStyle = gv;
+    // la cupola: il vino visto dall'alto
+    var rin = r - 6;
+    cx.fillStyle = sfera(0, 0, rin, f > 0 ? "#e0668f" : "#a8436a", "#33101f");
     cx.beginPath(); cx.arc(0, 0, rin, 0, Math.PI*2); cx.fill();
 
-    // il livello che sale a ogni colpo
+    // livello che sale
     if(q > 0){
       cx.save();
       cx.beginPath(); cx.arc(0, 0, rin, 0, Math.PI*2); cx.clip();
-      cx.fillStyle = "rgba(232,178,74,.34)";
+      cx.fillStyle = "rgba(232,178,74,.26)";
       cx.fillRect(-rin, rin - 2*rin*q, rin*2, rin*2);
       cx.restore();
     }
 
-    // riflesso sul vetro
-    cx.fillStyle = "rgba(255,255,255,.34)";
-    cx.beginPath(); cx.ellipse(-rin*0.35, -rin*0.4, rin*0.3, rin*0.16, -0.6, 0, Math.PI*2); cx.fill();
+    // luce dentro il vetro
+    cx.fillStyle = "rgba(255,255,255,.42)";
+    cx.beginPath(); cx.ellipse(-rin*0.36, -rin*0.42, rin*0.3, rin*0.15, -0.6, 0, Math.PI*2); cx.fill();
+    cx.fillStyle = "rgba(255,255,255,.16)";
+    cx.beginPath(); cx.ellipse(rin*0.3, rin*0.35, rin*0.22, rin*0.1, -0.5, 0, Math.PI*2); cx.fill();
 
-    // ghiera
-    cx.strokeStyle = "rgba(18,8,12,.55)"; cx.lineWidth = 1.6;
-    cx.beginPath(); cx.arc(0, 0, c.r, 0, Math.PI*2); cx.stroke();
+    cx.beginPath(); cx.arc(0, 0, rin, 0, Math.PI*2); contorno(1.4);
     cx.restore();
   });
 }
 
+/* ── i bersagli V I N O ─────────────────────────────────────────── */
 function disegnaBersagli(){
-  // piastra di base del gruppo
-  var x0 = bersagli[0].x - 16, x1 = bersagli[bersagli.length-1].x + 16;
+  var x0 = bersagli[0].x - 17, x1 = bersagli[bersagli.length-1].x + 17;
   cx.save();
-  cx.fillStyle = "rgba(10,4,8,.45)";
-  cx.fillRect(x0, 228, x1-x0, 9);
-  cx.fillStyle = "rgba(190,107,52,.5)";
-  cx.fillRect(x0, 226, x1-x0, 5);
-  cx.strokeStyle = "rgba(232,178,74,.45)"; cx.lineWidth = 1;
-  cx.strokeRect(x0, 226, x1-x0, 5);
+  ombra(3, 6, 8, 0.5, function(){
+    cx.fillStyle = "#241119";
+    cx.fillRect(x0, 200, x1-x0, 34);
+  });
+  // piastra di metallo
+  cx.fillStyle = grad(x0,200,x0,234,"#7c7263","#3a352d");
+  cx.fillRect(x0, 200, x1-x0, 34);
+  cx.strokeStyle = "rgba(255,246,230,.28)"; cx.lineWidth = 1.4;
+  cx.beginPath(); cx.moveTo(x0, 200.7); cx.lineTo(x1, 200.7); cx.stroke();
+  cx.fillStyle = "rgba(0,0,0,.35)";
+  cx.fillRect(x0, 230, x1-x0, 4);
+  cx.beginPath(); cx.rect(x0, 200, x1-x0, 34); contorno(1.6);
   cx.restore();
+
   bersagli.forEach(function(t){
     cx.save();
     cx.translate(t.x, t.y);
     if(t.giu){
-      cx.fillStyle = "rgba(244,237,226,.10)";
-      cx.fillRect(-t.w/2, -3, t.w, 6);
+      cx.fillStyle = "rgba(4,2,4,.85)";
+      cx.fillRect(-t.w/2 - 1, -4, t.w + 2, 8);
+      cx.strokeStyle = "rgba(255,246,230,.16)"; cx.lineWidth = 1;
+      cx.strokeRect(-t.w/2 - 1, -4, t.w + 2, 8);
     } else {
       var f = Math.max(0, t.flash);
-      if(f > 0){ cx.shadowColor = C.oro; cx.shadowBlur = 18*f; }
-      cx.fillStyle = grad(0,-t.h/2,0,t.h/2,"#f7f2e8","#c3b8a4");
+      if(f > 0){ cx.shadowColor = C.oro; cx.shadowBlur = 22*f; }
+      // fessura sotto
+      cx.fillStyle = "rgba(4,2,4,.8)";
+      cx.fillRect(-t.w/2 - 1, t.h/2 - 3, t.w + 2, 6);
+      // faccia smussata
+      cx.fillStyle = grad(0,-t.h/2,0,t.h/2,"#fdf9f0","#b2a794");
       cx.fillRect(-t.w/2, -t.h/2, t.w, t.h);
       cx.shadowBlur = 0;
-      cx.strokeStyle = "rgba(20,10,14,.55)"; cx.lineWidth = 1.4;
-      cx.strokeRect(-t.w/2, -t.h/2, t.w, t.h);
+      cx.fillStyle = "rgba(255,255,255,.75)";
+      cx.fillRect(-t.w/2, -t.h/2, t.w, 2.4);
+      cx.fillStyle = "rgba(0,0,0,.24)";
+      cx.fillRect(-t.w/2, t.h/2 - 2.6, t.w, 2.6);
+      cx.beginPath(); cx.rect(-t.w/2, -t.h/2, t.w, t.h); contorno(1.5);
       cx.fillStyle = C.vino;
-      cx.font = "700 13px Georgia, serif";
+      cx.font = "700 14px Georgia, serif";
       cx.textAlign = "center"; cx.textBaseline = "middle";
       cx.fillText(t.lettera, 0, 0.5);
     }
@@ -1083,328 +1230,420 @@ function disegnaBersagli(){
   });
 }
 
+/* ── gli spicchi: fionda con elastico sopra ─────────────────────── */
 function disegnaFionde(){
   fionde.forEach(function(f){
     var fl = Math.max(0, f.flash);
     cx.save();
-    cx.beginPath();
-    cx.moveTo(f.ax, f.ay); cx.lineTo(f.bx, f.by); cx.lineTo(f.cx, f.cy); cx.closePath();
-    var g = cx.createLinearGradient(f.ax, f.ay, f.bx, f.by);
-    g.addColorStop(0, "#f0d98a"); g.addColorStop(1, "#d9b959");
-    cx.fillStyle = g; cx.fill();
-    // buchi del formaggio
-    cx.fillStyle = "rgba(150,110,40,.45)";
-    var mx = (f.ax+f.bx+f.cx)/3, my = (f.ay+f.by+f.cy)/3;
-    [[0,-14,4],[8,6,3],[-10,10,3.4],[2,20,2.4]].forEach(function(o){
-      cx.beginPath(); cx.arc(mx + o[0]*(f.lato==="sx"?1:-1), my + o[1], o[2], 0, Math.PI*2); cx.fill();
+
+    // plastica sagomata, con lo spessore
+    ombra(3, 7, 8, 0.55, function(){
+      cx.beginPath();
+      cx.moveTo(f.ax, f.ay); cx.lineTo(f.bx, f.by); cx.lineTo(f.cx, f.cy); cx.closePath();
+      cx.fillStyle = "#2a1a08"; cx.fill();
     });
-    // bordo, acceso quando colpisci
-    cx.strokeStyle = fl > 0 ? C.oroChiaro : "rgba(90,60,20,.7)";
-    cx.lineWidth = fl > 0 ? 3.4 : 2;
-    if(fl > 0){ cx.shadowColor = C.oro; cx.shadowBlur = 16*fl; }
+    cx.beginPath();
+    cx.moveTo(f.ax, f.ay+4); cx.lineTo(f.bx, f.by+4); cx.lineTo(f.cx, f.cy+4); cx.closePath();
+    cx.fillStyle = "#8a6a20"; cx.fill();
+
     cx.beginPath();
     cx.moveTo(f.ax, f.ay); cx.lineTo(f.bx, f.by); cx.lineTo(f.cx, f.cy); cx.closePath();
-    cx.stroke();
+    var g = cx.createLinearGradient(f.ax, f.ay, f.cx, f.cy);
+    g.addColorStop(0, "#f6e3a0"); g.addColorStop(0.5, "#e8c96a"); g.addColorStop(1, "#c9a53f");
+    cx.fillStyle = g; cx.fill();
+
+    // i buchi del formaggio, con l'ombra dentro
+    var mx = (f.ax+f.bx+f.cx)/3, my = (f.ay+f.by+f.cy)/3, sx = (f.lato === "sx" ? 1 : -1);
+    [[0,-15,4.4],[9,5,3.2],[-9,9,3.6],[3,20,2.6],[-4,-4,2.2]].forEach(function(o){
+      var ox = mx + o[0]*sx, oy = my + o[1];
+      cx.fillStyle = "rgba(120,88,22,.55)";
+      cx.beginPath(); cx.arc(ox, oy, o[2], 0, Math.PI*2); cx.fill();
+      cx.fillStyle = "rgba(255,244,200,.5)";
+      cx.beginPath(); cx.arc(ox - o[2]*0.3, oy - o[2]*0.35, o[2]*0.55, 0, Math.PI*2); cx.fill();
+    });
+
+    cx.beginPath();
+    cx.moveTo(f.ax, f.ay); cx.lineTo(f.bx, f.by); cx.lineTo(f.cx, f.cy); cx.closePath();
+    contorno(1.8);
+
+    // i due paletti e l'elastico che colpisce
+    [[f.ax, f.ay],[f.cx, f.cy]].forEach(function(p){
+      cx.fillStyle = "rgba(6,2,5,.5)";
+      cx.beginPath(); cx.arc(p[0]+1.5, p[1]+3, 6, 0, Math.PI*2); cx.fill();
+      cx.fillStyle = sfera(p[0], p[1], 6, "#f4ecdb", "#7f7568");
+      cx.beginPath(); cx.arc(p[0], p[1], 6, 0, Math.PI*2); cx.fill();
+      cx.beginPath(); cx.arc(p[0], p[1], 6, 0, Math.PI*2); contorno(1.3);
+    });
+    if(fl > 0){ cx.shadowColor = C.oroChiaro; cx.shadowBlur = 20*fl; }
+    cx.strokeStyle = fl > 0 ? "#ffe9b4" : "#8d3355";
+    cx.lineWidth = fl > 0 ? 6 : 4.6; cx.lineCap = "round";
+    cx.beginPath(); cx.moveTo(f.ax, f.ay); cx.lineTo(f.bx, f.by); cx.stroke();
+    cx.shadowBlur = 0;
+    cx.strokeStyle = "rgba(255,240,225,.35)"; cx.lineWidth = 1.4;
+    cx.beginPath(); cx.moveTo(f.ax, f.ay-1.4); cx.lineTo(f.bx, f.by-1.4); cx.stroke();
     cx.restore();
   });
 }
 
+/* ── il bancone: corsie e etichette ─────────────────────────────── */
 function disegnaLuciArco(){
-  // fasce colorate nel canale, come le corsie del riferimento
   var rr = (ARCO.rOut + ARCO.rIn) / 2;
-  var tinte = ["rgba(232,178,74,.42)","rgba(190,107,52,.42)","rgba(47,107,70,.38)","rgba(141,51,85,.5)"];
+  var tinte = ["#e8b24a","#be6b34","#2f6b46","#8d3355","#2e7e77"];
   cx.save();
   cx.lineCap = "butt";
   for(var g2 = 188; g2 < 358; g2 += 6){
     var t1 = g2*Math.PI/180;
+    cx.globalAlpha = 0.5;
     cx.strokeStyle = tinte[(g2/6|0) % tinte.length];
     cx.lineWidth = 9;
     cx.beginPath();
-    cx.moveTo(ARCO.cx + Math.cos(t1)*(ARCO.rIn + 7), ARCO.cy + Math.sin(t1)*(ARCO.rIn + 7));
-    cx.lineTo(ARCO.cx + Math.cos(t1)*(ARCO.rOut - 7), ARCO.cy + Math.sin(t1)*(ARCO.rOut - 7));
+    cx.moveTo(ARCO.cx + Math.cos(t1)*(ARCO.rIn + 8), ARCO.cy + Math.sin(t1)*(ARCO.rIn + 8));
+    cx.lineTo(ARCO.cx + Math.cos(t1)*(ARCO.rOut - 8), ARCO.cy + Math.sin(t1)*(ARCO.rOut - 8));
     cx.stroke();
   }
   cx.restore();
+
   luciArco.forEach(function(L){
     cx.save();
     cx.translate(L.x, L.y);
     cx.rotate(L.ang + Math.PI/2);
-    // etichetta di bottiglia
-    if(L.on){ cx.shadowColor = C.oro; cx.shadowBlur = 14; }
-    cx.fillStyle = L.on ? C.oroChiaro : "rgba(244,237,226,.20)";
-    cx.fillRect(-8, -11, 16, 22);
+    ombra(2, 4, 6, 0.55, function(){
+      cx.fillStyle = "#1b0d14";
+      cx.fillRect(-9, -13, 18, 26);
+    });
+    if(L.on){ cx.shadowColor = C.oro; cx.shadowBlur = 18; }
+    cx.fillStyle = L.on ? grad(0,-13,0,13,"#fff0c8","#e0a93c") : grad(0,-13,0,13,"#584250","#33202c");
+    cx.fillRect(-9, -13, 18, 26);
     cx.shadowBlur = 0;
-    cx.strokeStyle = L.on ? "rgba(88,35,60,.8)" : "rgba(244,237,226,.3)";
-    cx.lineWidth = 1.2;
-    cx.strokeRect(-8, -11, 16, 22);
-    cx.fillStyle = L.on ? C.vino : "rgba(244,237,226,.35)";
-    cx.fillRect(-8, -3, 16, 2);
+    // la bottiglia stampata
+    cx.fillStyle = L.on ? "rgba(88,35,60,.85)" : "rgba(244,237,226,.28)";
+    cx.fillRect(-2.4, -10, 4.8, 8);
+    cx.fillRect(-5.5, -3, 11, 11);
+    cx.fillStyle = L.on ? "rgba(255,247,225,.85)" : "rgba(244,237,226,.2)";
+    cx.fillRect(-5.5, 1, 11, 3.4);
+    cx.beginPath(); cx.rect(-9, -13, 18, 26); contorno(1.4);
     cx.restore();
   });
 }
 
+/* ── il conto ───────────────────────────────────────────────────── */
 function disegnaConto(){
   if(!G.conto) return;
   var c = G.conto;
   cx.save();
   cx.translate(c.x, c.y);
-  cx.rotate(Math.sin(Date.now()/300) * 0.14);
-  cx.shadowColor = "rgba(0,0,0,.5)"; cx.shadowBlur = 10;
-  cx.fillStyle = C.crema;
-  cx.fillRect(-13, -17, 26, 34);
-  cx.shadowBlur = 0;
-  cx.strokeStyle = "rgba(60,30,20,.6)"; cx.lineWidth = 1.2;
-  cx.strokeRect(-13, -17, 26, 34);
-  cx.strokeStyle = "rgba(88,35,60,.65)"; cx.lineWidth = 1.4;
-  for(var i = 0; i < 4; i++){
-    cx.beginPath(); cx.moveTo(-8, -10 + i*7); cx.lineTo(8, -10 + i*7); cx.stroke();
+  cx.rotate(Math.sin(Date.now()/300) * 0.13);
+  ombra(3, 6, 9, 0.6, function(){
+    cx.fillStyle = "#0e0508";
+    cx.fillRect(-14, -18, 28, 36);
+  });
+  cx.fillStyle = grad(0,-18,0,18,"#fffaf0","#ccc0a8");
+  cx.fillRect(-14, -18, 28, 36);
+  // scontrino strappato in fondo
+  cx.fillStyle = C.fondo;
+  cx.beginPath();
+  cx.moveTo(-14, 18);
+  for(var i = 0; i < 5; i++){ cx.lineTo(-14 + i*7 + 3.5, 13); cx.lineTo(-14 + (i+1)*7, 18); }
+  cx.closePath(); cx.fill();
+  cx.strokeStyle = "rgba(141,51,85,.6)"; cx.lineWidth = 1.5;
+  for(var k = 0; k < 4; k++){
+    cx.beginPath(); cx.moveTo(-9, -11 + k*6); cx.lineTo(9 - (k===3?7:0), -11 + k*6); cx.stroke();
   }
   cx.fillStyle = C.vino;
   cx.font = "700 8px -apple-system, Helvetica, sans-serif";
-  cx.textAlign = "center";
-  cx.fillText("CONTO", 0, 15);
+  cx.textAlign = "center"; cx.textBaseline = "middle";
+  cx.fillText("CONTO", 0, 8.5);
+  cx.beginPath(); cx.rect(-14, -18, 28, 36); contorno(1.4);
   cx.restore();
 }
 
+/* ── le alette ──────────────────────────────────────────────────── */
 function disegnaAlette(){
   alette.forEach(function(f){
     var tipx = f.px + Math.cos(f.a)*f.len, tipy = f.py + Math.sin(f.a)*f.len;
     cx.save();
-    cx.lineCap = "round";
-    cx.strokeStyle = "rgba(10,4,7,.55)"; cx.lineWidth = f.r*2 + 4;
-    cx.beginPath(); cx.moveTo(f.px, f.py+2); cx.lineTo(tipx, tipy+2); cx.stroke();
-    var g = cx.createLinearGradient(f.px, f.py, tipx, tipy);
-    g.addColorStop(0, "#8d3355"); g.addColorStop(1, C.vino);
-    cx.strokeStyle = g; cx.lineWidth = f.r*2;
-    cx.beginPath(); cx.moveTo(f.px, f.py); cx.lineTo(tipx, tipy); cx.stroke();
-    cx.strokeStyle = "rgba(244,237,226,.35)"; cx.lineWidth = 2;
-    cx.beginPath(); cx.moveTo(f.px, f.py - 3); cx.lineTo(tipx, tipy - 3); cx.stroke();
+    cx.translate(f.px, f.py);
+    cx.rotate(f.a);
+    var L = f.len, r1 = 12, r2 = 7.5;
+
+    function sagoma(o){
+      cx.beginPath();
+      cx.arc(0, 0, r1 + o, Math.PI/2, -Math.PI/2, true);
+      cx.lineTo(L, -r2 - o);
+      cx.arc(L, 0, r2 + o, -Math.PI/2, Math.PI/2, true);
+      cx.closePath();
+    }
+    // ombra
+    cx.save(); cx.translate(2, 5);
+    cx.fillStyle = "rgba(6,2,5,.55)"; sagoma(1); cx.fill();
+    cx.restore();
+
+    // corpo
+    var g = cx.createLinearGradient(0, -r1, 0, r1);
+    g.addColorStop(0, "#c95a86"); g.addColorStop(0.42, "#8d3355"); g.addColorStop(1, "#4a1a30");
+    cx.fillStyle = g; sagoma(0); cx.fill();
+    sagoma(0); contorno(1.8);
+
+    // gomma chiara sul bordo che colpisce
+    cx.strokeStyle = "rgba(250,242,228,.8)"; cx.lineWidth = 3; cx.lineCap = "round";
+    cx.beginPath(); cx.moveTo(1, -r1 + 2); cx.lineTo(L - 1, -r2 + 1.6); cx.stroke();
+
     // perno
-    cx.fillStyle = C.rail;
-    cx.beginPath(); cx.arc(f.px, f.py, 5.5, 0, Math.PI*2); cx.fill();
+    cx.fillStyle = sfera(0, 0, 5.5, "#f6efe0", "#7d7263");
+    cx.beginPath(); cx.arc(0, 0, 5.5, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(0, 0, 5.5, 0, Math.PI*2); contorno(1.2);
     cx.restore();
   });
 }
 
+/* ── il tappo di sughero ────────────────────────────────────────── */
 function disegnaTappo(b){
   cx.save();
+  // ombra a terra, staccata
+  cx.fillStyle = "rgba(6,2,5,.5)";
+  cx.beginPath(); cx.ellipse(b.x + 4, b.y + 7, b.r*0.95, b.r*0.8, 0, 0, Math.PI*2); cx.fill();
+
   cx.translate(b.x, b.y);
   cx.rotate(b.rot);
-  cx.shadowColor = "rgba(0,0,0,.55)"; cx.shadowBlur = 9; cx.shadowOffsetY = 3;
-  var g = cx.createRadialGradient(-3.5, -4, 1.5, 0, 0, b.r);
-  g.addColorStop(0, "#e5c184");
-  g.addColorStop(0.6, C.sughero);
-  g.addColorStop(1, C.sugheroScuro);
-  cx.fillStyle = g;
+  cx.fillStyle = sfera(0, 0, b.r, "#f0d49a", "#8c5c26");
   cx.beginPath(); cx.arc(0, 0, b.r, 0, Math.PI*2); cx.fill();
-  cx.shadowBlur = 0; cx.shadowOffsetY = 0;
-  // granulosita' del sughero
-  cx.fillStyle = "rgba(120,78,32,.4)";
-  for(var i = 0; i < 7; i++){
-    var a = i*1.9, rr = 2 + (i%3)*2.4;
-    cx.beginPath(); cx.arc(Math.cos(a)*rr, Math.sin(a)*rr, 0.9, 0, Math.PI*2); cx.fill();
+  // grana
+  cx.fillStyle = "rgba(112,72,28,.42)";
+  for(var i = 0; i < 9; i++){
+    var a = i*1.7, rr = 1.8 + (i%4)*2.1;
+    cx.beginPath(); cx.arc(Math.cos(a)*rr, Math.sin(a)*rr, 0.95, 0, Math.PI*2); cx.fill();
   }
-  // la V impressa
-  cx.strokeStyle = "rgba(88,35,60,.75)"; cx.lineWidth = 1.6; cx.lineCap = "round";
-  cx.beginPath(); cx.moveTo(-3.6, -3.2); cx.lineTo(0, 3.4); cx.lineTo(3.6, -3.2); cx.stroke();
+  // la V
+  cx.strokeStyle = "rgba(76,28,50,.8)"; cx.lineWidth = 1.8; cx.lineCap = "round";
+  cx.beginPath(); cx.moveTo(-3.8, -3.4); cx.lineTo(0, 3.6); cx.lineTo(3.8, -3.4); cx.stroke();
+  cx.beginPath(); cx.arc(0, 0, b.r, 0, Math.PI*2); contorno(1.3);
   cx.restore();
+
+  // riflesso fisso, non gira col tappo
+  cx.fillStyle = "rgba(255,252,244,.55)";
+  cx.beginPath(); cx.ellipse(b.x - b.r*0.36, b.y - b.r*0.42, b.r*0.3, b.r*0.19, -0.6, 0, Math.PI*2); cx.fill();
 }
 
+/* ── lampadine appese ───────────────────────────────────────────── */
 function disegnaLampade(){
-  [[70, 96],[450, 96],[64, 250],[456, 250]].forEach(function(p, i){
-    var pulsa = 0.72 + Math.sin(Date.now()/620 + i)*0.13;
-    var g = cx.createRadialGradient(p[0], p[1], 2, p[0], p[1], 46);
-    g.addColorStop(0, "rgba(255,231,178," + (0.55*pulsa) + ")");
-    g.addColorStop(0.35, "rgba(232,178,74,.14)");
+  [[70, 96],[450, 96],[62, 246],[458, 246]].forEach(function(p, i){
+    var puls = 0.72 + Math.sin(Date.now()/620 + i)*0.13;
+    cx.save();
+    cx.strokeStyle = "rgba(20,10,14,.5)"; cx.lineWidth = 1.4;
+    cx.beginPath(); cx.moveTo(p[0], p[1]-40); cx.lineTo(p[0], p[1]-8); cx.stroke();
+    var g = cx.createRadialGradient(p[0], p[1], 2, p[0], p[1], 50);
+    g.addColorStop(0, "rgba(255,231,178," + (0.5*puls) + ")");
+    g.addColorStop(0.32, "rgba(232,178,74,.13)");
     g.addColorStop(1, "rgba(232,178,74,0)");
     cx.fillStyle = g;
-    cx.beginPath(); cx.arc(p[0], p[1], 46, 0, Math.PI*2); cx.fill();
-    cx.fillStyle = "rgba(255,238,196," + pulsa + ")";
-    cx.beginPath(); cx.arc(p[0], p[1], 4.6, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(p[0], p[1], 50, 0, Math.PI*2); cx.fill();
+    cx.fillStyle = sfera(p[0], p[1], 6, "#fffdf2", "rgba(240,190,110," + puls + ")");
+    cx.beginPath(); cx.arc(p[0], p[1], 6, 0, Math.PI*2); cx.fill();
+    cx.restore();
   });
 }
 
+/* ── muri, paletti, corsie ──────────────────────────────────────── */
 function disegnaMuri(){
-  // guide visibili sui muri principali
-  rail(16, 300, 16, 838, 5);
-  rail(504, 300, 504, 838, 5);
-  rail(64, 300, 64, 430, 4);
-  rail(16, 468, 150, 522, 4);
-  rail(456, 300, 456, 838, 4);
-  rail(456, 856, 504, 856, 4);
-  rail(16, 838, 128, 876, 5);
-  rail(456, 838, 344, 876, 5);
-  rail(76, 700, 116, 826, 4);
-  rail(444, 700, 404, 826, 4);
-  railArco(ARCO.cx, ARCO.cy, ARCO.rOut, 180, 360, 5);
-  railArco(ARCO.cx, ARCO.cy, ARCO.rIn, 180, 360, 5);
+  rail(16, 300, 16, 838, 6);
+  rail(504, 300, 504, 856, 6);
+  rail(64, 300, 64, 430, 5);
+  rail(16, 468, 150, 522, 5);
+  rail(456, 300, 456, 838, 5);
+  rail(456, 856, 504, 856, 5);
+  rail(16, 838, 128, 876, 6);
+  rail(456, 838, 344, 876, 6);
+  rail(76, 700, 116, 826, 5);
+  rail(444, 700, 404, 826, 5);
+  railArco(ARCO.cx, ARCO.cy, ARCO.rOut, 180, 360, 6);
+  railArco(ARCO.cx, ARCO.cy, ARCO.rIn, 180, 360, 6);
 
-  // paletti
   perni.forEach(function(p){
-    cx.fillStyle = "rgba(10,4,7,.5)";
-    cx.beginPath(); cx.arc(p.x, p.y+2, p.r, 0, Math.PI*2); cx.fill();
-    var g = cx.createRadialGradient(p.x-2, p.y-3, 1, p.x, p.y, p.r);
-    g.addColorStop(0, "#f2e9d8"); g.addColorStop(1, "#9a8f7c");
-    cx.fillStyle = g;
+    cx.save();
+    cx.fillStyle = "rgba(6,2,5,.55)";
+    cx.beginPath(); cx.ellipse(p.x+2, p.y+5, p.r, p.r*0.85, 0, 0, Math.PI*2); cx.fill();
+    cx.fillStyle = "#5c5246";
+    cx.beginPath(); cx.arc(p.x, p.y+2.5, p.r, 0, Math.PI*2); cx.fill();
+    cx.fillStyle = sfera(p.x, p.y, p.r, "#f6efe0", "#8a8071");
     cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, Math.PI*2); contorno(1.4);
+    cx.restore();
   });
 }
 
+/* ── targa in cima ──────────────────────────────────────────────── */
 function disegnaTarga(){
   cx.save();
   cx.translate(236, 152);
-  // ovale
-  cx.fillStyle = "rgba(10,4,8,.4)";
-  cx.beginPath(); cx.ellipse(0, 3, 84, 34, 0, 0, Math.PI*2); cx.fill();
+  ombra(3, 7, 10, 0.55, function(){
+    cx.fillStyle = "#1a0a12";
+    cx.beginPath(); cx.ellipse(0, 0, 84, 34, 0, 0, Math.PI*2); cx.fill();
+  });
   var g = cx.createLinearGradient(0, -34, 0, 34);
-  g.addColorStop(0, "rgba(141,51,85,.85)"); g.addColorStop(1, "rgba(60,22,38,.9)");
+  g.addColorStop(0, "#9c3d5f"); g.addColorStop(0.5, "#6a2440"); g.addColorStop(1, "#3d1526");
   cx.fillStyle = g;
   cx.beginPath(); cx.ellipse(0, 0, 84, 34, 0, 0, Math.PI*2); cx.fill();
-  cx.strokeStyle = "rgba(232,178,74,.75)"; cx.lineWidth = 2;
-  cx.beginPath(); cx.ellipse(0, 0, 84, 34, 0, 0, Math.PI*2); cx.stroke();
-  cx.strokeStyle = "rgba(232,178,74,.3)"; cx.lineWidth = 1;
-  cx.beginPath(); cx.ellipse(0, 0, 78, 28, 0, 0, Math.PI*2); cx.stroke();
-  // il sigillo V
-  cx.strokeStyle = C.oroChiaro; cx.lineWidth = 2.6; cx.lineCap = "round";
-  cx.beginPath(); cx.moveTo(-9, -12); cx.lineTo(0, 8); cx.lineTo(9, -12); cx.stroke();
-  cx.fillStyle = C.oroChiaro;
+  cx.beginPath(); cx.ellipse(0, 0, 84, 34, 0, 0, Math.PI*2); contorno(2);
+  cx.strokeStyle = "rgba(232,178,74,.8)"; cx.lineWidth = 2;
+  cx.beginPath(); cx.ellipse(0, 0, 79, 29, 0, 0, Math.PI*2); cx.stroke();
+  cx.strokeStyle = "rgba(255,240,210,.28)"; cx.lineWidth = 1.6;
+  cx.beginPath(); cx.ellipse(0, -1.5, 74, 25, 0, Math.PI*1.08, Math.PI*1.9); cx.stroke();
+  cx.strokeStyle = C.oroChiaro; cx.lineWidth = 2.8; cx.lineCap = "round";
+  cx.beginPath(); cx.moveTo(-9, -13); cx.lineTo(0, 7); cx.lineTo(9, -13); cx.stroke();
+  cx.fillStyle = "rgba(16,6,10,.5)";
   cx.font = "italic 13px Georgia, serif";
   cx.textAlign = "center"; cx.textBaseline = "middle";
-  cx.fillText("vineria", 0, 20);
+  cx.fillText("vineria", 0, 20.5);
+  cx.fillStyle = C.oroChiaro;
+  cx.fillText("vineria", 0, 19.5);
   cx.restore();
 }
 
+/* ── dettagli: luci, acini, frecce, tovagliolo ──────────────────── */
 function disegnaDettagli(){
   var t = Date.now() / 700;
 
-  // borchie: lucine dipinte sul piano, come i puntini del tavolo vero
   BORCHIE.forEach(function(p, i){
-    var puls = 0.45 + Math.sin(t + i*0.9) * 0.22;
+    var puls = 0.4 + Math.sin(t + i*0.9) * 0.2;
     cx.save();
-    cx.fillStyle = "rgba(8,3,6,.5)";
-    cx.beginPath(); cx.arc(p[0], p[1]+1.5, 4.6, 0, Math.PI*2); cx.fill();
-    var g = cx.createRadialGradient(p[0]-1, p[1]-1.5, 0.6, p[0], p[1], 4.6);
-    if(i % 3 === 0){
-      g.addColorStop(0, "rgba(255,226,170," + (0.75+puls*0.25) + ")");
-      g.addColorStop(1, "rgba(190,107,52,.8)");
-    } else if(i % 3 === 1){
-      g.addColorStop(0, "rgba(255,240,220,.9)");
-      g.addColorStop(1, "rgba(88,35,60,.85)");
-    } else {
-      g.addColorStop(0, "rgba(210,235,205,.85)");
-      g.addColorStop(1, "rgba(47,107,70,.85)");
-    }
-    cx.fillStyle = g;
-    cx.beginPath(); cx.arc(p[0], p[1], 4.6, 0, Math.PI*2); cx.fill();
+    cx.fillStyle = "rgba(6,2,5,.5)";
+    cx.beginPath(); cx.arc(p[0]+1.4, p[1]+3, 5, 0, Math.PI*2); cx.fill();
+    cx.fillStyle = "#4a4238";
+    cx.beginPath(); cx.arc(p[0], p[1]+1.5, 5, 0, Math.PI*2); cx.fill();
+    var tinta = i % 3 === 0 ? ["#ffe6b0", C.ruggine]
+              : i % 3 === 1 ? ["#fff2e0", "#8d3355"]
+                            : ["#d6f0d2", "#2f6b46"];
+    cx.fillStyle = sfera(p[0], p[1], 5, tinta[0], tinta[1]);
+    cx.beginPath(); cx.arc(p[0], p[1], 5, 0, Math.PI*2); cx.fill();
+    cx.globalAlpha = 0.25 + puls*0.4;
+    cx.fillStyle = "rgba(255,246,220,.8)";
+    cx.beginPath(); cx.arc(p[0]-1.5, p[1]-1.8, 1.9, 0, Math.PI*2); cx.fill();
+    cx.globalAlpha = 1;
+    cx.beginPath(); cx.arc(p[0], p[1], 5, 0, Math.PI*2); contorno(1.2);
     cx.restore();
   });
 
-  // acini nelle corsie interne
   ACINI.forEach(function(a){
     var on = a.on > 0;
     cx.save();
-    if(on){ cx.shadowColor = C.oro; cx.shadowBlur = 14; }
-    var g = cx.createRadialGradient(a.x-2, a.y-2, 0.8, a.x, a.y, 6.4);
-    g.addColorStop(0, on ? "#ffe9b8" : "rgba(244,237,226,.35)");
-    g.addColorStop(1, on ? C.oro : "rgba(88,35,60,.55)");
-    cx.fillStyle = g;
-    cx.beginPath(); cx.arc(a.x, a.y, 6.4, 0, Math.PI*2); cx.fill();
+    cx.fillStyle = "rgba(6,2,5,.5)";
+    cx.beginPath(); cx.arc(a.x+1.4, a.y+3, 6.6, 0, Math.PI*2); cx.fill();
+    if(on){ cx.shadowColor = C.oro; cx.shadowBlur = 16; }
+    cx.fillStyle = sfera(a.x, a.y, 6.6, on ? "#fff0c4" : "#8a4a68", on ? "#c58c22" : "#3c1626");
+    cx.beginPath(); cx.arc(a.x, a.y, 6.6, 0, Math.PI*2); cx.fill();
+    cx.shadowBlur = 0;
+    cx.fillStyle = "rgba(255,255,255,.4)";
+    cx.beginPath(); cx.ellipse(a.x-2.2, a.y-2.4, 2, 1.3, -0.6, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(a.x, a.y, 6.6, 0, Math.PI*2); contorno(1.2);
     cx.restore();
   });
 
-  // frecce nelle corsie, verso le alette
+  // frecce dipinte nelle corsie
   cx.save();
-  cx.fillStyle = "rgba(232,178,74,.30)";
-  [[128,700,1],[344,700,-1]].forEach(function(f){
+  [[130,690,1],[342,690,-1]].forEach(function(f){
     for(var k = 0; k < 3; k++){
-      var y = f[1] + k*26;
+      var y = f[1] + k*30;
+      cx.fillStyle = "rgba(232,178,74," + (0.16 + k*0.09) + ")";
       cx.beginPath();
-      cx.moveTo(f[0] + f[2]*7, y + 9);
-      cx.lineTo(f[0] - f[2]*7, y);
-      cx.lineTo(f[0] + f[2]*7, y - 9);
+      cx.moveTo(f[0] + f[2]*8, y + 10);
+      cx.lineTo(f[0] - f[2]*8, y);
+      cx.lineTo(f[0] + f[2]*8, y - 10);
       cx.closePath(); cx.fill();
+      cx.strokeStyle = "rgba(16,6,11,.4)"; cx.lineWidth = 1; cx.stroke();
     }
   });
   cx.restore();
 
   // il tovagliolo piegato sotto le alette
   cx.save();
-  cx.translate(236, 858); cx.rotate(0.02);
-  cx.fillStyle = "rgba(88,35,60,.55)";
+  cx.translate(236, 846); cx.rotate(0.02);
+  ombra(2, 5, 8, 0.5, function(){
+    cx.fillStyle = "#2b0f1c";
+    cx.beginPath();
+    cx.moveTo(-104, 14); cx.lineTo(-62, -12); cx.lineTo(-20, 12);
+    cx.lineTo(20, -12); cx.lineTo(62, 12); cx.lineTo(104, -12);
+    cx.lineTo(104, 30); cx.lineTo(-104, 30); cx.closePath(); cx.fill();
+  });
+  var g = cx.createLinearGradient(0, -12, 0, 30);
+  g.addColorStop(0, "#9c3d5f"); g.addColorStop(1, "#4a1a30");
+  cx.fillStyle = g;
   cx.beginPath();
-  cx.moveTo(-96, 26); cx.lineTo(-58, -18); cx.lineTo(-20, 22);
-  cx.lineTo(20, -18); cx.lineTo(58, 22); cx.lineTo(96, -18);
-  cx.lineTo(96, 40); cx.lineTo(-96, 40); cx.closePath();
+  cx.moveTo(-104, 14); cx.lineTo(-62, -12); cx.lineTo(-20, 12);
+  cx.lineTo(20, -12); cx.lineTo(62, 12); cx.lineTo(104, -12);
+  cx.lineTo(104, 30); cx.lineTo(-104, 30); cx.closePath();
   cx.fill();
-  cx.strokeStyle = "rgba(141,51,85,.7)"; cx.lineWidth = 1.4; cx.stroke();
+  cx.strokeStyle = "rgba(255,222,232,.24)"; cx.lineWidth = 1.4; cx.stroke();
   cx.restore();
 }
 
+/* ── targhe del costruttore ─────────────────────────────────────── */
 function disegnaTarghe(){
   cx.save();
   cx.font = "700 13px Georgia, serif";
-  cx.fillStyle = "rgba(190,107,52,.75)";
   cx.textBaseline = "alphabetic";
-  cx.textAlign = "left";
-  cx.fillText("VINICOLO", 44, 844);
-  cx.textAlign = "right";
-  cx.fillText("SMCV", 476, 844);
+  cx.fillStyle = "rgba(10,4,8,.6)";
+  cx.textAlign = "left";  cx.fillText("VINICOLO", 44, 845);
+  cx.textAlign = "right"; cx.fillText("SMCV", 446, 845);
+  cx.fillStyle = "rgba(190,107,52,.85)";
+  cx.textAlign = "left";  cx.fillText("VINICOLO", 44, 844);
+  cx.textAlign = "right"; cx.fillText("SMCV", 446, 844);
   cx.restore();
 }
 
+/* ── il lanciatore ──────────────────────────────────────────────── */
 function disegnaLanciatore(){
   var y = 852 - (G.fase === "carica" ? G.carica*26 : 0);
   cx.save();
-  // molla
-  cx.strokeStyle = "rgba(216,205,187,.7)"; cx.lineWidth = 2.4;
+  cx.strokeStyle = "rgba(6,2,5,.5)"; cx.lineWidth = 3.4;
   cx.beginPath();
-  for(var i = 0; i < 7; i++){
-    cx.moveTo(466, y + 6 + i*4);
-    cx.lineTo(494, y + 8 + i*4);
-  }
+  for(var i = 0; i < 7; i++){ cx.moveTo(466, y + 8 + i*4); cx.lineTo(494, y + 10 + i*4); }
   cx.stroke();
-  // testa del lanciatore
-  cx.fillStyle = C.ruggine;
-  cx.fillRect(462, y, 36, 8);
+  cx.strokeStyle = "#cfc4b1"; cx.lineWidth = 2.4;
+  cx.beginPath();
+  for(var k = 0; k < 7; k++){ cx.moveTo(466, y + 6 + k*4); cx.lineTo(494, y + 8 + k*4); }
+  cx.stroke();
+  cx.fillStyle = grad(462,y,462,y+9,"#e08f4c","#8d4a1c");
+  cx.fillRect(462, y, 36, 9);
+  cx.beginPath(); cx.rect(462, y, 36, 9); contorno(1.4);
   cx.restore();
 }
 
+/* ── messaggi ───────────────────────────────────────────────────── */
 function disegnaMessaggi(){
   cx.save();
   cx.textAlign = "center"; cx.textBaseline = "middle";
   G.messaggi.forEach(function(m, i){
     var op = Math.min(1, m.vita / 0.6);
     cx.globalAlpha = op;
-    cx.font = "italic 22px Georgia, serif";
-    cx.fillStyle = "rgba(12,5,8,.7)";
-    cx.fillText(m.t, 236, 700 - i*30 + 1.5);
+    cx.font = "italic 23px Georgia, serif";
+    cx.fillStyle = "rgba(10,4,8,.8)";
+    cx.fillText(m.t, 236, 706 - i*30 + 2);
     cx.fillStyle = C.oroChiaro;
-    cx.fillText(m.t, 236, 700 - i*30);
+    cx.fillText(m.t, 236, 706 - i*30);
   });
   cx.globalAlpha = 1;
   if(G.tilt){
-    cx.font = "700 46px Georgia, serif";
-    cx.fillStyle = "rgba(141,51,85,.9)";
-    cx.fillText("TILT", 236, 470);
+    cx.font = "700 48px Georgia, serif";
+    cx.fillStyle = "rgba(10,4,8,.8)"; cx.fillText("TILT", 236, 472);
+    cx.fillStyle = "#c4507d"; cx.fillText("TILT", 236, 470);
   }
   cx.restore();
 }
 
+/* ── il quadro completo ─────────────────────────────────────────── */
 function disegna(){
   cx.save();
-  if(G.scossa > 0){
-    cx.translate(G.scossaX * 5 * G.scossa, 0);
-  }
+  if(G.scossa > 0) cx.translate(G.scossaX * 5 * G.scossa, 0);
   disegnaCassa();
   disegnaPiano();
   disegnaCanali();
   disegnaLampade();
-  disegnaRampe();
-  disegnaTagliere();
   disegnaTarga();
   disegnaDettagli();
   disegnaMuri();
   disegnaLuciArco();
+  disegnaRampe();
+  disegnaTagliere();
   disegnaBersagli();
   disegnaFionde();
   disegnaCalici();
@@ -1416,11 +1655,20 @@ function disegna(){
   disegnaTarghe();
   cx.restore();
 
-  // cornice della cassa, sopra a tutto
-  cx.strokeStyle = "#1a0c12"; cx.lineWidth = 20;
+  // vetro: un velo di luce sul piano
+  var vg = cx.createLinearGradient(60, 40, 460, 800);
+  vg.addColorStop(0, "rgba(255,240,220,.07)");
+  vg.addColorStop(0.4, "rgba(255,240,220,0)");
+  cx.fillStyle = vg;
+  cx.fillRect(20, 20, W-40, H-40);
+
+  // cornice della cassa
+  cx.strokeStyle = "#170a10"; cx.lineWidth = 20;
   cx.strokeRect(10, 10, W-20, H-20);
-  cx.strokeStyle = "rgba(190,107,52,.28)"; cx.lineWidth = 2;
+  cx.strokeStyle = "rgba(190,107,52,.3)"; cx.lineWidth = 2;
   cx.strokeRect(20, 20, W-40, H-40);
+  cx.strokeStyle = "rgba(0,0,0,.5)"; cx.lineWidth = 2;
+  cx.strokeRect(21.5, 21.5, W-43, H-43);
 }
 
 /* ══════════════════════════════════════════════════════════════════
