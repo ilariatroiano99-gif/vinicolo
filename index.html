@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vinicolo Vineria · Vineria · Santa Maria Capua Vetere</title>
+<meta name="description" content="Vinicolo Vineria, vineria con cucina a Santa Maria Capua Vetere. Da noi sei a casa: cucina di casa, vino scelto bene, aperitivo, cene ed eventi. Come a casa, ma senza sbatti.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --burg:#58233C; --burg-2:#6A2C49; --burg-deep:#2A0F1C; --noir:#170710;
+    --green:#0D2E1F;
+    --cream:#F0E8D5; --cream-2:#E7DCC4; --paper:#F4EDDD;
+    --ink:#3A2417; --gray:#8A7A64;
+    --rust:#BE6B34; --gold:#C17D2A; --gold-2:#D99A47;
+    --tan:#E4D8BF; --line-d:rgba(245,240,232,.16); --line-l:rgba(58,36,23,.22);
+    --sr:'Cormorant Garamond',Georgia,serif; --ss:'Inter',system-ui,sans-serif; --sh:'Caveat',cursive;
+    --s1:8px; --s2:16px; --s3:24px; --s4:32px; --s5:48px; --s6:64px; --s7:96px; --s8:128px;
+    --pad:clamp(56px,9vw,128px); --r:10px; --nav:54px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--ss);background:var(--cream);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  h1,h2,h3,h4{font-family:var(--sr);font-weight:600;line-height:1.02}
+  a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
+  .wrap{width:100%;max-width:1100px;margin:0 auto;padding:0 clamp(20px,5vw,56px);position:relative;z-index:2}
+  .hand{font-family:var(--sh);font-weight:700;line-height:.95}
+  .pill{display:inline-block;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:var(--gray);background:var(--cream-2);padding:7px 16px;border-radius:999px}
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s1);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;height:50px;padding:0 var(--s4);border-radius:999px;border:1px solid currentColor;transition:.3s cubic-bezier(.2,.7,.2,1);cursor:pointer;white-space:nowrap}
+  .btn.burg{background:var(--burg);border-color:var(--burg);color:var(--cream)}.btn.burg:hover{background:var(--burg-2);transform:translateY(-2px)}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:#fff}.btn.gold:hover{background:var(--gold-2);border-color:var(--gold-2);transform:translateY(-2px)}
+  .btn.line{color:var(--ink);border-color:rgba(58,36,23,.3)}.btn.line:hover{background:var(--ink);color:var(--cream);transform:translateY(-2px)}
+  .btn.lineC{color:var(--cream)}.btn.lineC:hover{background:var(--cream);color:var(--burg);transform:translateY(-2px)}
+
+  header{position:absolute;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:var(--s3) clamp(20px,5vw,56px);color:var(--cream)}
+  header .brand{display:flex;align-items:center;gap:var(--s2)}
+  .brand .mk{width:38px;height:38px;border-radius:50%;overflow:hidden;background:var(--burg);flex:none}
+  .brand .mk img{width:100%;height:100%;object-fit:cover;transform:scale(1.08)}
+  .brand .wm{font-family:var(--sr);font-size:1.6rem;font-weight:600}
+  nav.main{display:flex;align-items:center;gap:var(--s4)}
+  nav.main a{font-size:.8rem;letter-spacing:.02em;opacity:.9;transition:.25s}nav.main a:hover{color:var(--gold-2)}
+  nav.main .btn{color:#fff;height:42px;padding:0 var(--s3)}
+  .burger{display:none;flex-direction:column;gap:6px;background:none;border:0;cursor:pointer;padding:6px}
+  .burger span{width:25px;height:2px;background:var(--cream);transition:.4s}
+
+  /* COPERTINA */
+  .hero{position:relative;height:100svh;min-height:600px;overflow:hidden;color:var(--cream)}
+  .hero .ph{position:absolute;inset:0;z-index:0}
+  .hero .ph img{width:100%;height:100%;object-fit:cover;object-position:center 44%;transform:scale(1.04)}
+  .hero::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(23,7,16,.58),rgba(23,7,16,.10) 26%,rgba(30,10,20,.14) 54%,rgba(20,6,14,.80)),radial-gradient(78% 62% at 6% 92%,rgba(20,6,14,.72),transparent 66%),radial-gradient(120% 80% at 22% 42%,rgba(88,35,60,.14),transparent 60%)}
+  .hero .corners{position:absolute;inset:0;z-index:3;pointer-events:none}
+  .hero .corners span{position:absolute;font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(245,240,232,.72)}
+  .hero .c-top{top:calc(var(--s7) + var(--s2));left:50%;transform:translateX(-50%)}
+  .hero .c-cat{top:calc(var(--s7) + var(--s6));left:clamp(20px,5vw,56px)}
+  .hero .c-claim{bottom:calc(var(--s7) + var(--s1));right:clamp(20px,5vw,56px);text-align:right;line-height:2;max-width:15ch}
+  .hero .c-hours{bottom:var(--s5);right:clamp(20px,5vw,56px);text-align:right;line-height:1.9;opacity:.7}
+  .hero .center{position:absolute;z-index:3;left:clamp(20px,5vw,56px);bottom:clamp(84px,15vh,160px)}
+  .hero h1{font-family:var(--sr);font-weight:500;font-size:clamp(4.4rem,15vw,14rem);line-height:.82}
+  .hero .sub{font-family:var(--sr);font-style:italic;font-size:clamp(1.2rem,3vw,2rem);margin-top:var(--s2);max-width:26ch;opacity:.95}
+
+  /* LA VINERIA */
+  .about{padding:var(--pad) 0;background:var(--cream)}
+  .about .grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(28px,6vw,80px);align-items:center}
+  .about .ph{justify-self:center}
+  .about .ph img{width:min(84vw,360px);border-radius:var(--r);transform:rotate(-2deg);box-shadow:0 20px 50px rgba(58,36,23,.18)}
+  .about .ph .cap{font-family:var(--sh);font-size:1.15rem;color:var(--gray);text-align:center;margin-top:var(--s2)}
+  .about h2{font-family:var(--sr);font-style:italic;font-weight:600;font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.04;color:var(--burg);margin-top:var(--s3)}
+  .about p{font-size:1.05rem;margin-top:var(--s3);max-width:42ch}
+  .about .sig{font-family:var(--sh);font-size:1.45rem;color:var(--rust);margin-top:var(--s3)}
+
+  /* VETRINA · le tre cose buone */
+  .vetrina{padding:var(--pad) 0 calc(var(--pad) * .6);background:var(--cream)}
+  .vetrina .vhead{margin-bottom:var(--s5)}
+  .vetrina h2{font-family:var(--sr);font-style:italic;font-weight:600;font-size:clamp(2.2rem,5.5vw,3.6rem);color:var(--burg);line-height:1.02;margin-top:var(--s2)}
+  .vetrina .vsub{font-family:var(--sh);font-size:1.35rem;color:var(--rust);margin-top:var(--s1)}
+  .vetrina .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:clamp(24px,4vw,52px)}
+  .vetrina .pt{display:block;color:inherit}
+  .vetrina .pt .ph{display:block;overflow:hidden;border-radius:var(--r);aspect-ratio:3/4;background:var(--tan)}
+  .vetrina .pt .ph img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.2,.7,.2,1)}
+  .vetrina .pt:hover .ph img{transform:scale(1.05)}
+  .vetrina .pt .n{display:block;font-size:.6rem;letter-spacing:.28em;color:var(--gray);margin-top:var(--s3)}
+  .vetrina .pt h3{font-family:var(--sr);font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--burg);font-size:clamp(1.02rem,2.2vw,1.32rem);margin-top:5px}
+  .vetrina .pt .rule{display:block;height:1px;background:var(--line-l);margin:var(--s3) 0 0;transition:background .4s}
+  .vetrina .pt:hover .rule{background:var(--rust)}
+  .vetrina .pt .d{display:block;font-family:var(--sh);font-size:1.2rem;color:var(--rust);line-height:1.35;margin-top:9px}
+
+  /* FASCICOLI apri e chiudi (Menù, Da bere, Carta dei vini) */
+  .fasc{border-top:1px solid var(--line-l);scroll-margin-top:calc(var(--nav) + var(--s2))}
+  .vini .fasc{border-bottom:1px solid var(--line-l)}
+  .fasc > summary{display:block;cursor:pointer;list-style:none;padding:var(--s5) 0;transition:background .4s ease}
+  .fasc > summary::-webkit-details-marker{display:none}
+  .fasc > summary::marker{content:""}
+  .fasc > summary:hover{background:color-mix(in srgb, var(--rust) 7%, transparent)}
+  .fasc > summary:focus-visible{outline:2px solid var(--rust);outline-offset:-4px}
+  .fasc > summary .mtitle{position:relative;max-width:none;margin:0;margin-bottom:0;padding-right:clamp(52px,9vw,90px);transition:transform .4s cubic-bezier(.2,.7,.2,1)}
+  .fasc > summary:hover .mtitle{transform:translateX(8px)}
+  .fasc > summary .mtitle h2{font-size:clamp(2.4rem,6.4vw,4.4rem);line-height:.95}
+  .fasc > summary .mtitle .sub{font-size:1.45rem}
+  .fasc .segno{position:absolute;right:0;top:50%;width:clamp(26px,4vw,38px);height:clamp(26px,4vw,38px);margin-top:calc(clamp(26px,4vw,38px) / -2)}
+  .fasc .segno::before,.fasc .segno::after{content:"";position:absolute;left:0;top:50%;width:100%;height:1.5px;background:var(--burg);transition:transform .45s cubic-bezier(.2,.7,.2,1),opacity .3s}
+  .fasc .segno::after{transform:rotate(90deg)}
+  .fasc[open] .segno::after{transform:rotate(0deg);opacity:0}
+  .fasc[open] > summary .mtitle{transform:none}
+  .fasc[open] > summary{background:color-mix(in srgb, var(--rust) 5%, transparent)}
+  .fasc > summary .coperto{text-align:left;font-size:1.12rem;margin-top:var(--s1);opacity:.85}
+  .fasc .mgroup{padding-top:var(--s3)}
+  .fasc > .wrap{padding-bottom:var(--s6)}
+
+  /* MENU */
+  .menu{padding:var(--pad) 0 0;background:var(--cream)}
+  .mtitle{margin-bottom:var(--s5)}
+  .mtitle h2{font-family:var(--sr);font-style:italic;font-weight:600;font-size:clamp(3rem,8vw,5.6rem);color:var(--burg);line-height:.95;margin-top:var(--s2)}
+  .mtitle .sub{font-family:var(--sh);font-size:1.45rem;color:var(--rust);margin-top:var(--s1)}
+  .catbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:var(--s1);overflow-x:auto;padding:var(--s2) clamp(20px,5vw,56px);background:rgba(240,232,213,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line-l);border-bottom:1px solid var(--line-l);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .catbar::-webkit-scrollbar{display:none}
+  .catbar .lab{font-family:var(--sh);font-size:1.1rem;color:var(--rust);flex:none;margin-right:var(--s1)}
+  .catbar a{flex:none;font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;font-weight:600;padding:9px var(--s2);border-radius:999px;color:var(--gray);background:var(--cream-2);transition:.25s}
+  .catbar a.on{background:var(--burg);color:var(--cream)}
+  .mgroup{padding-top:var(--s6)}
+  .mcat,.bcat{scroll-margin-top:calc(var(--nav) + var(--s2))}
+  .mcat{max-width:840px;margin:0 auto var(--s6)}
+  .mc-head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s2);border-bottom:1px solid var(--line-l);padding-bottom:var(--s1);margin-bottom:var(--s4)}
+  .mc-head h3,.mc-head h4{font-family:var(--sr);font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--burg);font-size:clamp(1.25rem,2.6vw,1.7rem)}
+  .mc-note{font-family:var(--sh);font-size:1.1rem;color:var(--rust);text-align:right;flex:none}
+  .mc-items{display:grid;gap:var(--s4)}
+  .mrow{display:grid;gap:4px}
+  .mr-top{display:flex;align-items:baseline;gap:var(--s1)}
+  .mr-name{font-family:var(--sr);font-size:1.45rem;font-weight:600;color:var(--ink)}
+  .mr-name.feat{color:var(--rust)}
+  .mr-dots{flex:1;border-bottom:1px dotted rgba(58,36,23,.35);transform:translateY(-5px);min-width:16px}
+  .mr-price{font-family:var(--sr);font-style:italic;font-size:1.35rem;font-weight:600;color:var(--burg);white-space:nowrap}
+  .mr-price .eu{font-size:.62em;vertical-align:.35em;font-style:normal;margin-left:1px}
+  .mr-desc{font-family:var(--ss);font-style:italic;font-size:.9rem;color:var(--gray);max-width:52ch}
+  .mr-tip{font-family:var(--sh);font-size:1.05rem;color:var(--rust);margin-top:2px}
+  .mr-alg{font-family:var(--ss);font-size:.72rem;letter-spacing:.02em;color:var(--gray);margin-top:3px}
+  .coperto{text-align:center;font-family:var(--sh);font-size:1.35rem;color:var(--rust);margin-top:var(--s2)}
+  .new{display:inline-block;font-family:var(--ss);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--rust);background:var(--tan);padding:3px 9px;border-radius:999px;vertical-align:middle;margin-left:var(--s1)}
+  .new.promo{color:var(--burg)}
+  .bar-title{max-width:840px;margin:0 auto var(--s4)}
+  .bar-title h3{font-family:var(--sr);font-style:italic;font-weight:600;font-size:clamp(2.2rem,5vw,3.2rem);color:var(--burg);margin-top:var(--s1)}
+  .bar-title .sub{font-family:var(--sh);font-size:1.35rem;color:var(--rust)}
+  .bar-grid{max-width:840px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:var(--s6)}
+  .bcat{margin:0}.bcat .mc-items{gap:var(--s3)}.bcat .mr-name{font-size:1.28rem}.bcat .mr-price{font-size:1.22rem}
+  .mnote{max-width:840px;margin:var(--s7) auto 0;font-size:.84rem;font-style:italic;color:var(--gray);text-align:center}
+
+  /* VINI */
+  .vini{padding:0 0 var(--pad);background:var(--cream)}
+  .wq{max-width:840px;margin:0 auto var(--s7)}
+  .wq .rule{height:1px;background:var(--line-l);margin-bottom:var(--s5)}
+  .wq p.q{font-family:var(--sr);font-style:italic;font-size:clamp(1.5rem,3vw,2.1rem);color:var(--burg);line-height:1.22;max-width:22ch}
+  .wq p.n{font-family:var(--sh);font-size:1.2rem;color:var(--rust);margin-top:var(--s2)}
+  .vini .mtitle{max-width:840px;margin:0 auto var(--s5)}
+  .vini .mtitle h2{font-family:var(--sr);font-style:italic;font-weight:600;font-size:clamp(2.8rem,7vw,4.6rem);color:var(--burg);line-height:.95}
+  .vini .mtitle .sub{font-family:var(--sh);font-size:1.4rem;color:var(--rust)}
+  .vini-empty{text-align:center;max-width:44ch;margin:0 auto;font-family:var(--sr);font-size:1.3rem}.vini-empty em{color:var(--rust);font-style:italic}
+
+  /* SERATE */
+  .serate{position:relative;background:var(--burg);color:var(--cream);padding:var(--pad) 0}
+  .serate::before{content:"";position:absolute;inset:0;background-image:url("img/trama-serate.png");background-size:clamp(320px,42vw,560px) auto;opacity:1;pointer-events:none}
+  .serate > *{position:relative;z-index:1}
+  .serate .shead{display:flex;align-items:baseline;gap:var(--s2);margin-bottom:var(--s5)}
+  .serate .shead .n{font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:var(--green);font-weight:600}
+  .serate .shead .rule{height:1px;background:var(--line-l);flex:1;transform:translateY(-4px)}
+  .serate .intro{max-width:44ch;color:var(--cream);opacity:.84;margin-bottom:var(--s5)}
+  .serate .pt-head h2{font-family:var(--sr);font-size:clamp(2.4rem,5.6vw,4.2rem);font-weight:600;color:var(--cream);line-height:1.05}.serate .pt-head h2 em{font-style:italic;color:var(--cream)}
+  .serate .occhio{color:var(--gold-2)}
+  .serate .pt-head{color:var(--cream)}
+  /* PORTE: sezioni che si aprono, una per volta, ognuna col suo colore */
+  .porta{scroll-margin-top:calc(var(--nav) + var(--s2))}
+  .porta > summary{display:block;cursor:pointer;list-style:none;padding:clamp(44px,6.5vw,80px) 0}
+  .porta > summary::-webkit-details-marker{display:none}
+  .porta > summary::marker{content:""}
+  .porta > summary:focus-visible{outline:2px solid currentColor;outline-offset:-6px}
+  .porta .pt-head{position:relative;padding-right:clamp(66px,9vw,112px);transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+  .porta > summary:hover .pt-head{transform:translateX(10px)}
+  .porta[open] > summary .pt-head{transform:none}
+  .porta .occhio{display:block;font-family:var(--ss);font-size:.64rem;letter-spacing:.28em;text-transform:uppercase;font-weight:600;margin-bottom:var(--s3)}
+  .porta .pt-head h2{margin:0}
+  .porta .freccia{position:absolute;right:0;top:50%;width:clamp(46px,6vw,58px);height:clamp(46px,6vw,58px);
+    margin-top:calc(clamp(46px,6vw,58px) / -2);border-radius:50%;border:1px solid currentColor;opacity:.55;
+    transition:opacity .4s ease,transform .5s cubic-bezier(.2,.7,.2,1)}
+  .porta .freccia::after{content:"";position:absolute;left:50%;top:44%;width:30%;height:30%;
+    border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;
+    transform:translate(-50%,-50%) rotate(45deg)}
+  .porta > summary:hover .freccia{opacity:1}
+  .porta[open] > summary .freccia{transform:rotate(180deg);opacity:1}
+  .porta .dentro{padding-bottom:var(--pad)}
+
+  /* SERATE · card che scorrono di lato */
+  .ser-wrap{position:relative;margin:0 calc(clamp(20px,5vw,56px) * -1)}
+  .ser-track{display:flex;gap:clamp(14px,2vw,24px);overflow-x:auto;scroll-snap-type:x mandatory;
+    scroll-padding-left:clamp(20px,5vw,56px);padding:4px clamp(20px,5vw,56px) var(--s2);
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  .ser-track::-webkit-scrollbar{display:none}
+  .serata{flex:0 0 clamp(255px,74vw,336px);scroll-snap-align:start;display:flex;flex-direction:column;
+    overflow:hidden;border:1px solid var(--line-l);border-radius:14px;background:#FFFDF9;
+    transition:border-color .45s ease,transform .45s cubic-bezier(.2,.7,.2,1),background .45s ease}
+  .serata:hover{border-color:var(--green);transform:translateY(-4px);background:#fff}
+  .serata .corpo{display:flex;flex-direction:column;flex:1;padding:var(--s4)}
+  .serata .loc-img{display:block;aspect-ratio:4/3;overflow:hidden;background:rgba(58,36,23,.05);border-bottom:1px solid var(--line-l)}
+  .serata .loc-img img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.2,.7,.2,1)}
+  .serata:hover .loc-img img{transform:scale(1.05)}
+  .serata .quando{display:flex;flex-direction:column;gap:3px}
+  .serata .gg{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--green)}
+  .serata .num{font-family:var(--sr);font-size:clamp(3.1rem,8vw,4.4rem);line-height:.84;color:var(--burg)}
+  .serata .mese{font-family:var(--sh);font-size:1.15rem;color:var(--rust);margin-top:2px}
+  .serata .solo-data{font-family:var(--sr);font-style:italic;font-size:clamp(1.5rem,3vw,1.9rem);color:var(--rust);line-height:1.14}
+  .serata .rig{display:block;height:1px;background:var(--line-l);margin:var(--s3) 0}
+  .serata h3{font-family:var(--sr);font-weight:600;font-size:clamp(1.32rem,2.3vw,1.6rem);line-height:1.14;color:var(--burg)}
+  .serata p{font-size:.93rem;opacity:.8;margin-top:10px;line-height:1.5;color:var(--ink)}
+  .serata .azioni{margin-top:auto;padding-top:var(--s4);display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap}
+  .serata .loc,.serata .pren{font-family:var(--ss);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;
+    text-decoration:none;padding-bottom:3px;transition:border-color .3s ease,color .3s ease}
+  .serata .loc{color:var(--rust);border-bottom:1px solid rgba(190,107,52,.45)}
+  .serata .loc:hover{border-color:var(--rust)}
+  .serata .pren{color:var(--ink);opacity:.62;border-bottom:1px solid transparent}
+  .serata .pren:hover{opacity:1;border-color:var(--line-l)}
+  .ser-nav-row{display:none;justify-content:flex-end;gap:10px;padding:0 clamp(20px,5vw,56px);margin-top:var(--s2)}
+  .ser-nav{width:42px;height:42px;border-radius:50%;border:1px solid var(--line-d);background:transparent;
+    color:var(--cream);cursor:pointer;font-size:.95rem;line-height:1;
+    transition:border-color .3s ease,color .3s ease,opacity .3s ease}
+  .ser-nav:hover:not(:disabled){border-color:var(--gold-2);color:var(--gold-2)}
+  .ser-nav:disabled{opacity:.28;cursor:default}
+  @media(min-width:821px){.ser-nav-row{display:flex}}
+
+  .programma{border-top:1px solid var(--line-d)}
+  .ev{position:relative;display:grid;grid-template-columns:minmax(140px,180px) 1fr auto;align-items:baseline;gap:var(--s2) var(--s4);padding:var(--s4) var(--s2);border-bottom:1px solid var(--line-d);transition:padding .35s ease,background .35s ease}
+  .ev::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold-2);transform:scaleY(0);transform-origin:top;transition:transform .35s ease}
+  .ev:hover{padding-left:var(--s4);background:rgba(245,240,232,.03)}
+  .ev:hover::before{transform:scaleY(1)}
+  .ev-date{display:flex;flex-direction:column;align-items:flex-start;gap:9px}
+  .ev-day{font-family:var(--sr);font-style:italic;font-size:clamp(1.3rem,2.6vw,1.7rem);color:var(--gold-2);line-height:1.05}
+  .ev-time{font-family:var(--ss);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.72;border:1px solid var(--line-d);border-radius:999px;padding:4px 11px}
+  .ev-main h3{font-family:var(--sr);font-weight:600;font-size:clamp(1.5rem,3.3vw,2.2rem);line-height:1.1}
+  .ev-main p{font-size:.94rem;opacity:.8;margin-top:8px;max-width:48ch}
+  .ev-flyer{display:inline-block;margin-top:14px;font-family:var(--ss);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-2);text-decoration:none;border-bottom:1px solid rgba(200,160,90,.45);padding-bottom:3px;transition:border-color .3s ease}
+  .ev-flyer:hover{border-color:var(--gold-2)}
+  .ev-go{align-self:center;text-decoration:none;color:var(--gold-2)}
+  .ev-go span{display:inline-block;font-family:var(--ss);font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;border-bottom:1px solid transparent;padding-bottom:3px;transition:border-color .3s ease}
+  .ev:hover .ev-go span{border-color:var(--gold-2)}
+  .ev-empty{position:relative;border:1px solid var(--line-l);border-radius:16px;padding:var(--s6) var(--s4);text-align:center;background:#FFFDF9}
+  .ev-empty .seal-dot{display:inline-block;width:40px;height:40px;border-radius:50%;border:1px solid var(--green);position:relative;margin-bottom:var(--s3);opacity:.85}
+  .ev-empty .seal-dot::after{content:"V";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--sr);font-style:italic;color:var(--green);font-size:1.15rem}
+  .ev-empty p{font-family:var(--sr);font-style:italic;font-size:clamp(1.4rem,3vw,2rem);color:var(--burg)}
+  .ev-empty .hint{display:block;max-width:40ch;margin:var(--s2) auto 0;font-size:.9rem;opacity:.72}
+
+  /* EVENTO */
+  .evento{background:var(--cream);color:var(--ink);padding:var(--pad) 0}
+  .evento .over{display:block;font-family:var(--ss);font-size:.64rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold-2);font-weight:600;margin-bottom:var(--s3)}
+  .evento h2{font-family:var(--sr);font-weight:600;font-size:clamp(2.4rem,6.5vw,4.6rem);line-height:1.03;max-width:15ch;color:var(--burg)}
+  .evento .occhio{color:var(--rust)}
+  .evento .pt-head{color:var(--burg)}
+  .evento .pt-head h2{max-width:18ch}
+  .evento h2 em{font-style:italic;color:var(--rust)}
+  .evento .ev-top p{color:var(--ink);opacity:.85;max-width:50ch;margin-top:var(--s3);font-size:1.05rem}
+  .evento .ev-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(28px,5vw,64px);margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--line-l)}
+  .evento .step .num{font-family:var(--sr);font-style:italic;font-size:2.6rem;line-height:1;color:var(--rust);opacity:.55}
+  .evento .step h3{font-family:var(--sr);font-size:1.4rem;font-weight:600;margin:var(--s2) 0 7px;color:var(--burg)}
+  .evento .step p{color:var(--ink);opacity:.8;font-size:.95rem;max-width:28ch;margin:0}
+  .evento .btn.lineC{color:var(--burg)}.evento .btn.lineC:hover{background:var(--burg);color:var(--cream)}
+  .evento .ev-cta{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s7)}
+
+  /* PRIMA DI ANDARE */
+  .bye{background:var(--cream);padding:var(--pad) 0;text-align:center}
+  .bye .k{font-family:var(--sh);font-size:1.3rem;color:var(--rust)}
+  .bye h2{font-family:var(--sr);font-style:italic;font-weight:600;font-size:clamp(2.4rem,6vw,4.2rem);color:var(--burg);line-height:1.06;margin:var(--s3) auto var(--s2);max-width:16ch}
+  .bye h2 u{text-decoration:none;background-image:linear-gradient(var(--gold),var(--gold));background-size:100% 3px;background-repeat:no-repeat;background-position:0 92%;padding-bottom:2px}
+  .bye .cta{margin-top:var(--s5);display:flex;flex-direction:column;align-items:center;gap:var(--s2)}
+  .bye .cta .btn{min-width:260px}
+  .bye .sig{font-family:var(--sh);font-size:1.35rem;color:var(--burg);margin-top:var(--s5)}
+  .bye .rev{margin-top:var(--s3);font-size:.9rem}.bye .rev a{color:var(--rust);border-bottom:1px solid var(--rust);padding-bottom:1px}
+
+  /* FOOTER */
+  footer{background:var(--burg-deep);color:rgba(245,240,232,.82);padding:var(--s7) 0 var(--s6)}
+  footer .top{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s6)}
+  footer .top .mk{width:76px;height:76px;flex:none}footer .top .mk img{width:100%;height:100%;object-fit:contain}
+  footer .top .wm{font-family:var(--sr);font-style:italic;font-weight:600;font-size:clamp(2.4rem,6vw,3.4rem);color:var(--cream);line-height:.9}
+  footer .top .tw{font-family:var(--sh);font-size:1.4rem;color:var(--gold-2)}
+  footer .cols{display:grid;grid-template-columns:1fr 1fr;gap:var(--s5) var(--s4);max-width:640px}
+  footer .col .l{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-2);margin-bottom:var(--s1)}
+  footer .col .v{font-size:1.05rem;line-height:1.5}footer .col .v a:hover{color:var(--gold-2)}footer .col .v .dim{color:rgba(245,240,232,.5)}
+  footer .lg{border-top:1px solid var(--line-d);margin-top:var(--s6);padding-top:var(--s3);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:var(--s2);font-size:.72rem;letter-spacing:.06em;color:rgba(245,240,232,.5)}
+  footer .lg .sig{font-family:var(--sh);font-size:1.2rem;color:var(--gold-2)}
+
+  .mm{position:fixed;inset:0;z-index:70;background:var(--burg-deep);color:var(--cream);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:var(--s3);transform:translateY(-100%);opacity:0;transition:transform .5s cubic-bezier(.7,0,.2,1),opacity .3s}
+  .mm.open{transform:translateY(0);opacity:1}.mm a{font-family:var(--sr);font-size:2rem}.mm .x{position:absolute;top:var(--s3);right:var(--s3);font-size:2rem;background:none;border:0;color:var(--cream);cursor:pointer}
+
+  #glass{position:fixed;left:0;top:0;z-index:80;font-size:2.1rem;cursor:pointer;user-select:none;display:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));transition:filter .2s}
+  #glass:hover{filter:drop-shadow(0 6px 14px rgba(0,0,0,.5)) brightness(1.2)}
+  #glass.go{animation:bounce 17s linear infinite}
+  @keyframes bounce{0%{transform:translate(4vw,16vh)}20%{transform:translate(78vw,44vh)}40%{transform:translate(26vw,72vh)}60%{transform:translate(70vw,20vh)}80%{transform:translate(14vw,54vh)}100%{transform:translate(4vw,16vh)}}
+  .toast{position:fixed;left:50%;bottom:var(--s4);transform:translateX(-50%) translateY(160%);z-index:90;background:var(--burg);color:var(--cream);border:1px solid var(--gold);border-radius:var(--r);padding:var(--s2) var(--s3);max-width:min(90vw,420px);text-align:center;font-size:.95rem;box-shadow:0 14px 40px rgba(0,0,0,.4);transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+  .toast.show{transform:translateX(-50%) translateY(0)}.toast .h{font-family:var(--sr);font-size:1.2rem;display:block;margin-bottom:4px;color:var(--gold-2)}
+  .modal{position:fixed;inset:0;z-index:95;background:rgba(23,7,16,.82);display:none;align-items:center;justify-content:center;padding:var(--s3)}.modal.show{display:flex}
+  .modal .box{background:var(--burg);border:1px solid var(--line-d);border-radius:var(--r);padding:var(--s6) var(--s5);max-width:400px;text-align:center;color:var(--cream)}.modal .box .em{font-size:2.6rem}.modal .box h3{font-family:var(--sr);font-size:1.9rem;margin:var(--s1) 0}.modal .box p{opacity:.85;font-family:var(--sr);font-style:italic;font-size:1.25rem}.modal .box button{margin-top:var(--s3)}
+
+  /* NELL'ATTESA */
+  .giochi{background:var(--burg-deep);color:var(--cream);padding:var(--pad) 0}
+  .giochi .shead{display:flex;align-items:baseline;gap:var(--s2);margin-bottom:var(--s5)}
+  .giochi .shead .n{font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .giochi .shead .rule{height:1px;background:var(--line-l);flex:1;transform:translateY(-4px)}
+  .giochi .gtop{margin-bottom:var(--s5)}
+  .giochi .pt-head h2{font-family:var(--sr);font-style:italic;font-weight:600;font-size:clamp(2.4rem,6vw,4rem);color:var(--cream);line-height:1.02}
+  .giochi .pt-head h2 em{color:var(--gold-2)}
+  .giochi .occhio{color:var(--gold-2)}
+  .giochi .pt-head{color:var(--cream)}
+  .giochi .gtop p{color:var(--cream);opacity:.8;max-width:44ch;margin-top:var(--s2)}
+  .gcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:var(--s2)}
+  .gcard{border-radius:var(--r);padding:var(--s4);min-height:168px;display:flex;flex-direction:column;justify-content:space-between;gap:var(--s3);transition:.3s;border:1px solid var(--line-d);color:var(--cream)}
+  .gcard .gc-k{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-2);font-weight:600}
+  .gcard h3{font-family:var(--sr);font-size:1.7rem;font-weight:600;margin:var(--s1) 0 4px}
+  .gcard p{font-size:.92rem;color:var(--cream);opacity:.78}
+  .gcard .gc-go{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+  .gcard.live{background:var(--burg);border-color:var(--burg);color:var(--cream)}
+  .gcard.live .gc-k{color:var(--gold-2)}.gcard.live p{color:rgba(245,240,232,.72)}.gcard.live .gc-go{color:var(--gold-2)}
+  .gcard.live:hover{transform:translateY(-5px);background:var(--burg-2)}
+  .gcard.soon{opacity:.66}.gcard.soon .gc-go{color:var(--gray)}
+
+  @media(max-width:820px){
+    nav.main{display:none}.burger{display:flex}
+    .about .grid{grid-template-columns:1fr;gap:var(--s5)}
+    .evento .ev-steps{grid-template-columns:1fr;gap:var(--s4);margin-top:var(--s5);padding-top:var(--s4)}
+    .evento h2{font-size:clamp(2.2rem,9vw,3.2rem)}
+    .bar-grid{grid-template-columns:1fr;gap:var(--s6)}
+    /* sul telefono non si nasconde piu niente: le scritte si impilano in basso */
+    .hero .c-cat{top:calc(var(--s7) + var(--s2));left:clamp(20px,5vw,56px);right:auto;transform:none;text-align:left;max-width:38%;letter-spacing:.14em;line-height:1.55}
+    .hero .c-top{top:calc(var(--s7) + var(--s2));left:auto;right:clamp(20px,5vw,56px);transform:none;text-align:right;max-width:46%;letter-spacing:.14em;line-height:1.55}
+    .hero .c-claim{left:clamp(20px,5vw,56px);right:clamp(20px,5vw,56px);bottom:calc(var(--s5) + 30px);text-align:left;max-width:none;line-height:1.6}
+    .hero .c-hours{left:clamp(20px,5vw,56px);right:auto;text-align:left}
+    .hero .center{bottom:calc(var(--s5) + 64px)}
+    .hero h1{font-size:clamp(3.6rem,17vw,6rem)}
+    .hero .sub{font-size:clamp(1.05rem,4.4vw,1.4rem);max-width:22ch}
+    footer .cols{grid-template-columns:1fr 1fr;gap:var(--s4) var(--s3)}
+    footer .top{flex-direction:row}
+    .mr-name{font-size:1.32rem}.mr-price{font-size:1.22rem}
+    .mc-head{flex-direction:column;align-items:flex-start;gap:4px}
+    .mc-note{text-align:left;width:100%;font-size:1rem;line-height:1.3}
+    .ev{grid-template-columns:1fr;gap:10px;padding:var(--s3) 0}
+    .ev:hover{padding-left:var(--s2)}
+    .ev-date{flex-direction:row;align-items:center;gap:12px}
+    .ev-go{align-self:start}
+    .evento .invito .seal{width:112px;right:-20px;bottom:-20px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="#top" id="logo"><span class="mk"><img src="img/logo-badge.png" alt="Vinicolo Vineria"></span><span class="wm">Vinicolo</span></a>
+  <nav class="main"><a href="#about">La vineria</a><a href="#menu">Il menù</a><a href="#vini">I vini</a><a href="#serate">Serate</a><a href="#giochi">Giochi</a><a class="btn burg" href="tel:+3908231540345">Prenota</a></nav>
+  <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+</header>
+<div class="mm" id="mm"><button class="x" id="xmm">&times;</button>
+  <a href="#about">La vineria</a><a href="#menu">Il menù</a><a href="#vini">I vini</a><a href="#serate">Serate</a><a href="#find">Dove siamo</a><a href="tel:+3908231540345">Prenota</a>
+</div>
+
+<!-- COPERTINA -->
+<section class="hero" id="top">
+  <div class="ph"><img src="img/copertina-tagliere.jpg?v=1787757787" alt="Tagliere di salumi e due calici di rosso sul tavolo di Vinicolo"></div>
+  <div class="corners">
+    <span class="c-top">Santa Maria Capua Vetere · Caserta</span>
+    <span class="c-cat">Vineria con cucina</span>
+    <span class="c-claim">Come a casa, ma senza sbatti.</span>
+    <span class="c-hours">Aperti dalle 18:30 · chiusi il mercoledì</span>
+  </div>
+  <div class="center"><h1>Vinicolo</h1><p class="sub">Aperitivo, cena, post cena</p></div>
+</section>
+
+<!-- LA VINERIA -->
+<section class="about" id="about">
+  <div class="wrap"><div class="grid">
+    <div class="ph reveal"><img src="img/interno.jpg?v=1787502486" alt="Vinicolo"><div class="cap">casa nostra, e un po&#x27; anche vostra</div></div>
+    <div class="reveal"><span class="pill">La vineria</span><h2>Un posto facile, per gente che ama le cose buone.</h2><p>Da noi si mangia come a casa: polpette al sugo, taglieri fatti bene, ricette di famiglia. Sapori che si riconoscono, senza tante storie. Nessuna fretta, mai.</p><div class="sig">come a casa, ma senza sbatti.</div></div>
+  </div></div>
+</section>
+
+<section class="vetrina" id="vetrina"><div class="wrap"><div class="vhead reveal"><span class="pill">Da mangiare</span><h2>Quello che ti consigliamo</h2><div class="vsub">poi il resto lo trovi nel menù</div></div><div class="grid"><a class="pt reveal" href="#taglieri"><span class="ph"><img src="img/piatto-tagliere.jpg?v=1787777546" alt="Il tagliere" loading="lazy"></span><span class="n">01</span><h3>Il tagliere</h3><span class="d">salumi e formaggi, da dividere o no</span><span class="rule"></span></a><a class="pt reveal" href="#panini"><span class="ph"><img src="img/piatto-panino.jpg?v=1787780347" alt="Il panino del mese" loading="lazy"></span><span class="n">02</span><h3>Il panino del mese</h3><span class="d">cambia ogni mese, chiedi qual è</span><span class="rule"></span></a><a class="pt reveal" href="#antipasti"><span class="ph"><img src="img/piatto-antipasti-fritti.jpg?v=1788800072" alt="Gli antipasti" loading="lazy"></span><span class="n">03</span><h3>Gli antipasti</h3><span class="d">polpette, bruschette, e la mozzarella che fila</span><span class="rule"></span></a></div></div></section>
+
+<!-- IL MENU -->
+<section class="menu" id="menu">
+  <details class="fasc" id="f-cucina">
+    <summary><div class="wrap"><div class="mtitle"><span class="pill">Cucina</span><h2>Il Menù</h2><div class="sub">da condividere (o no)</div><p class="coperto">Coperto € 1,50</p><span class="segno" aria-hidden="true"></span></div></div></summary>
+    <div class="mgroup">
+      <nav class="catbar"><span class="lab">cucina ·</span><a href="#aperivino">Aperivino</a><a href="#antipasti">Antipasti</a><a href="#taglieri">Taglieri</a><a href="#panini">Panini</a><a href="#focacce">Focacce</a><a href="#zingare">Zingare</a><a href="#insalatone">Insalatone</a><a href="#contorni">Contorni</a><a href="#dolci">Dolci</a></nav>
+      <div class="wrap" style="padding-top:var(--s6)"><section class="mcat reveal" id="aperivino"><div class="mc-head"><h3>Aperivino</h3><span class="mc-note">dalle 18:30 alle 20:00</span></div><div class="mc-items"><div class="mrow"><div class="mr-top"><span class="mr-name">Aperivino della casa</span><span class="mr-dots"></span><span class="mr-price">8,00<span class="eu">€</span></span></div><div class="mr-desc">calice di vino + aperitivo della casa · Aglianico, Montepulciano, Falanghina o Osco</div><div class="mr-tip">&rarr; il rito</div><div class="mr-alg">allergeni: solfiti</div></div></div></section><section class="mcat reveal" id="antipasti"><div class="mc-head"><h3>Antipasti</h3><span class="mc-note">per iniziare piano</span></div><div class="mc-items"><div class="mrow"><div class="mr-top"><span class="mr-name">Bruschette</span><span class="mr-dots"></span><span class="mr-price">3,00<span class="eu">€</span></span></div><div class="mr-desc">2 pz · con pomodorini, verdura del giorno</div><div class="mr-alg">allergeni: glutine, può contenere solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Frittelle di verdure</span><span class="mr-dots"></span><span class="mr-price">3,00<span class="eu">€</span></span></div><div class="mr-desc">5 pz · surgelato</div><div class="mr-alg">allergeni: glutine, può contenere solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Patatine fritte con buccia</span><span class="mr-dots"></span><span class="mr-price">4,50<span class="eu">€</span></span></div><div class="mr-desc">surgelato</div><div class="mr-alg">allergeni: glutine</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Chips con buccia</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-alg">allergeni: glutine</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Patate doppia cottura<span class="new">new</span></span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-alg">allergeni: glutine</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Straccetti di pollo croccanti</span><span class="mr-dots"></span><span class="mr-price">6,00<span class="eu">€</span></span></div><div class="mr-alg">allergeni: glutine, uova e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Polpette fritte</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div><div class="mr-desc">4 pz</div><div class="mr-alg">allergeni: glutine, uova e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Polpette al sugo</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">4 pz · come le fa mamma</div><div class="mr-tip">&rarr; il consiglio</div><div class="mr-alg">allergeni: glutine, uova e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Polpette di melanzane</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">5 pz</div><div class="mr-alg">allergeni: glutine, uova e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Pepite fritte</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">5 pz · ripiene con patate, zucchine e provola</div><div class="mr-alg">allergeni: glutine, uova e derivati, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Franceschiello</span><span class="mr-dots"></span><span class="mr-price">6,00<span class="eu">€</span></span></div><div class="mr-desc">2 pz · cotoletta di mozzarella e prosciutto crudo</div><div class="mr-alg">allergeni: glutine, uova e derivati, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Mozzarella in carrozza</span><span class="mr-dots"></span><span class="mr-price">6,00<span class="eu">€</span></span></div><div class="mr-desc">2 pz</div><div class="mr-alg">allergeni: glutine, uova e derivati, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Medaglione di melanzana</span><span class="mr-dots"></span><span class="mr-price">6,00<span class="eu">€</span></span></div><div class="mr-desc">2 pz · ripieno di prosciutto e provola</div><div class="mr-alg">allergeni: glutine, uova e derivati, latte e derivati</div></div></div></section><section class="mcat reveal" id="taglieri"><div class="mc-head"><h3>Taglieri</h3><span class="mc-note">da condividere, o no · puoi chiederlo solo salumi o solo formaggi</span></div><div class="mc-items"><div class="mrow"><div class="mr-top"><span class="mr-name">Tagliere</span><span class="mr-dots"></span><span class="mr-price">10,00<span class="eu">€</span></span></div><div class="mr-desc">selezione di salumi e formaggi</div><div class="mr-alg">allergeni: latte e derivati, può contenere solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Tagliere x2</span><span class="mr-dots"></span><span class="mr-price">18,00<span class="eu">€</span></span></div><div class="mr-desc">selezione di salumi e formaggi</div><div class="mr-tip">&rarr; per due</div><div class="mr-alg">allergeni: latte e derivati, può contenere solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Tagliere x4</span><span class="mr-dots"></span><span class="mr-price">34,00<span class="eu">€</span></span></div><div class="mr-desc">selezione di salumi e formaggi</div><div class="mr-alg">allergeni: latte e derivati, può contenere solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Tagliere d&#x27;autunno x2<span class="new">new</span></span><span class="mr-dots"></span><span class="mr-price">20,00<span class="eu">€</span></span></div><div class="mr-desc">prosciutto crudo stagionato 16 mesi, gorgonzola piccante DOP, formaggio piccante DOP, frutta di stagione, frutta secca</div><div class="mr-alg">allergeni: glutine, latte e derivati, frutta a guscio</div></div></div></section><section class="mcat reveal" id="panini"><div class="mc-head"><h3>Panini</h3><span class="mc-note">pane, tempo, pazienza</span></div><div class="mc-items"><div class="mrow"><div class="mr-top"><span class="mr-name">Panino con frittata</span><span class="mr-dots"></span><span class="mr-price">3,50<span class="eu">€</span></span></div><div class="mr-desc">frittata del giorno, pomodoro, insalata</div><div class="mr-alg">allergeni: glutine, uova e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Panino con hamburger</span><span class="mr-dots"></span><span class="mr-price">10,00<span class="eu">€</span></span></div><div class="mr-desc">hamburger, provola, pomodoro, insalata</div><div class="mr-alg">allergeni: glutine, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Panino con salsiccia</span><span class="mr-dots"></span><span class="mr-price">9,00<span class="eu">€</span></span></div><div class="mr-desc">salsiccia, provola, pomodoro, insalata</div><div class="mr-alg">allergeni: glutine, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Panino con porchetta di Ariccia</span><span class="mr-dots"></span><span class="mr-price">9,50<span class="eu">€</span></span></div><div class="mr-desc">porchetta, provola, pomodoro, insalata</div><div class="mr-tip">&rarr; il preferito</div><div class="mr-alg">allergeni: glutine, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Panino con straccetti</span><span class="mr-dots"></span><span class="mr-price">10,00<span class="eu">€</span></span></div><div class="mr-desc">straccetti di pollo, bacon, provola, insalata, salsa barbecue</div><div class="mr-alg">allergeni: glutine, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Panino con crudo e bufala</span><span class="mr-dots"></span><span class="mr-price">12,00<span class="eu">€</span></span></div><div class="mr-desc">hamburger, prosciutto crudo, rucola, stracciata di bufala, pomodori secchi</div><div class="mr-alg">allergeni: glutine, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Panino del mese<span class="new">new</span></span><span class="mr-dots"></span><span class="mr-price">15,00<span class="eu">€</span></span></div><div class="mr-desc">capicollo, friarielli, burrata, pomodori secchi, tarallo sbriciolato</div><div class="mr-alg">allergeni: glutine, latte e derivati</div></div></div></section><section class="mcat reveal" id="focacce"><div class="mc-head"><h3>Focacce</h3><span class="mc-note">morbide, appena sfornate</span></div><div class="mc-items"><div class="mrow"><div class="mr-top"><span class="mr-name">La Classica</span><span class="mr-dots"></span><span class="mr-price">7,00<span class="eu">€</span></span></div><div class="mr-desc">prosciutto crudo, mozzarella, pomodoro, insalata</div><div class="mr-alg">allergeni: glutine, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">La Rustica</span><span class="mr-dots"></span><span class="mr-price">7,00<span class="eu">€</span></span></div><div class="mr-desc">mortadella, provolone piccante</div><div class="mr-alg">allergeni: glutine, latte e derivati</div></div></div></section><section class="mcat reveal" id="zingare"><div class="mc-head"><h3>Zingare</h3><span class="mc-note">piene fino all&#x27;orlo</span></div><div class="mc-items"><div class="mrow"><div class="mr-top"><span class="mr-name">Ischitana</span><span class="mr-dots"></span><span class="mr-price">8,00<span class="eu">€</span></span></div><div class="mr-desc">prosciutto crudo, mozzarella, insalata iceberg, pomodoro, maionese</div><div class="mr-alg">allergeni: glutine, uova e derivati, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Campagnola</span><span class="mr-dots"></span><span class="mr-price">9,50<span class="eu">€</span></span></div><div class="mr-desc">salsiccia, provola, verdura del giorno</div><div class="mr-alg">allergeni: glutine, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Boscaiola</span><span class="mr-dots"></span><span class="mr-price">10,00<span class="eu">€</span></span></div><div class="mr-desc">salsiccia, funghi, provolone piccante, rucola</div><div class="mr-alg">allergeni: glutine, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Saporita</span><span class="mr-dots"></span><span class="mr-price">10,00<span class="eu">€</span></span></div><div class="mr-desc">porchetta, provola, melanzane a funghetto</div><div class="mr-alg">allergeni: glutine, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Vegetariana</span><span class="mr-dots"></span><span class="mr-price">8,00<span class="eu">€</span></span></div><div class="mr-desc">mozzarella, zucchine, pomodoro, pesto</div><div class="mr-alg">allergeni: glutine, latte e derivati, frutta a guscio</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Vegana</span><span class="mr-dots"></span><span class="mr-price">8,00<span class="eu">€</span></span></div><div class="mr-desc">pomodorini secchi, zucchine grigliate, hummus di ceci, rucola</div><div class="mr-tip">&rarr; senza derivati animali</div><div class="mr-alg">allergeni: sesamo</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Mediterranea</span><span class="mr-dots"></span><span class="mr-price">8,00<span class="eu">€</span></span></div><div class="mr-desc">filetti di tonno sott&#x27;olio, olive nere, pomodorini, cipolla rossa, capperi</div><div class="mr-alg">allergeni: glutine, pesce, solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Nordica</span><span class="mr-dots"></span><span class="mr-price">10,00<span class="eu">€</span></span></div><div class="mr-desc">salmone, philadelphia, rucola, scorza di limone grattugiata, salsa yogurt</div><div class="mr-alg">allergeni: glutine, latte e derivati, uova e derivati, pesce</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Zingara scomposta</span><span class="mr-dots"></span><span class="mr-price">12,00<span class="eu">€</span></span></div><div class="mr-desc">bresaola, stracciata di bufala, pomodori secchi, zucchine grigliate, pesto di radicchio</div><div class="mr-tip">&rarr; signature</div><div class="mr-alg">allergeni: glutine, latte e derivati, frutta a guscio</div></div></div></section><section class="mcat reveal" id="insalatone"><div class="mc-head"><h3>Insalatone</h3><span class="mc-note">leggere, ma non troppo</span></div><div class="mc-items"><div class="mrow"><div class="mr-top"><span class="mr-name">Insalata di pollo</span><span class="mr-dots"></span><span class="mr-price">10,00<span class="eu">€</span></span></div><div class="mr-desc">iceberg, pollo, scaglie di grana, pomodorini, mais, salsa Caesar, crostini</div><div class="mr-alg">allergeni: glutine, uova e derivati, latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Insalata di tonno</span><span class="mr-dots"></span><span class="mr-price">9,00<span class="eu">€</span></span></div><div class="mr-desc">iceberg, tonno, mais, olive, pomodorini, cipolla rossa</div><div class="mr-alg">allergeni: pesce</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Insalata greca</span><span class="mr-dots"></span><span class="mr-price">9,00<span class="eu">€</span></span></div><div class="mr-desc">iceberg, pomodorini, feta, cipolla rossa, olive</div><div class="mr-alg">allergeni: latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Insalata Bresaola</span><span class="mr-dots"></span><span class="mr-price">10,00<span class="eu">€</span></span></div><div class="mr-desc">rucola, pomodorini, bresaola, scaglie di grana</div><div class="mr-alg">allergeni: latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Caprese</span><span class="mr-dots"></span><span class="mr-price">6,00<span class="eu">€</span></span></div><div class="mr-desc">mozzarella, pomodoro, basilico</div><div class="mr-alg">allergeni: latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Mozzarella</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">da 125 gr</div><div class="mr-alg">allergeni: latte e derivati</div></div></div></section><section class="mcat reveal" id="contorni"><div class="mc-head"><h3>Contorni</h3><span class="mc-note">solo di stagione · possono contenere allergeni, chiedi al banco</span></div><div class="mc-items"><div class="mrow"><div class="mr-top"><span class="mr-name">Melanzane</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">arrostite / a funghetto</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Friarielli</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">fritti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Peperoni</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">fritti / al gratin</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Funghi</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">trifolati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Scarole capperi e olive</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">in padella</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Zucchine</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">arrostite / alla scapece</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Patate</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">doppia cottura</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Aggiunta di contorno extra</span><span class="mr-dots"></span><span class="mr-price">1,00<span class="eu">€</span></span></div><div class="mr-desc">su un panino o un piatto</div></div></div></section><section class="mcat reveal" id="dolci"><div class="mc-head"><h3>Dolci</h3><span class="mc-note">sempre due cucchiaini</span></div><div class="mc-items"><div class="mrow"><div class="mr-top"><span class="mr-name">Dolce della casa</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">chiedi qual è oggi</div><div class="mr-tip">&rarr; chiedilo!</div></div></div></section></div>
+    </div>
+    <div class="wrap"><p class="mnote">Gli allergeni sono indicati su ogni piatto; per intolleranze chiedi pure al banco.</p></div>
+  </details>
+
+  <details class="fasc" id="f-bar">
+    <summary><div class="wrap"><div class="mtitle"><span class="pill">Bar</span><h2>Da bere</h2><div class="sub">calice, cocktail, o solo un&#x27;acqua</div><span class="segno" aria-hidden="true"></span></div></div></summary>
+    <div class="mgroup" id="dabere">
+      <nav class="catbar"><span class="lab">bar ·</span><a href="#calice">Al calice</a><a href="#cocktail">Cocktail</a><a href="#bibite">Bibite &amp; birre</a><a href="#amari">Grappe, amari, liquori</a></nav>
+      <div class="wrap" style="padding-top:var(--s6)"><div class="bar-grid"><section class="bcat reveal" id="calice"><div class="mc-head"><h4>Al calice</h4><span class="mc-note">sempre aperto</span></div><div class="mrow"><div class="mr-top"><span class="mr-name">Aglianico</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div><div class="mr-desc">rosso</div><div class="mr-alg">allergeni: solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Montepulciano</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">rosso</div><div class="mr-alg">allergeni: solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Falanghina</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div><div class="mr-desc">bianco</div><div class="mr-alg">allergeni: solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Osco</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">bianco</div><div class="mr-alg">allergeni: solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Prosecco</span><span class="mr-dots"></span><span class="mr-price">3,50<span class="eu">€</span></span></div><div class="mr-desc">bollicine</div><div class="mr-alg">allergeni: solfiti</div></div></section><section class="bcat reveal" id="cocktail"><div class="mc-head"><h4>Cocktail</h4><span class="mc-note">aggiungi il nostro aperitivo della casa a soli 2 € e diventa un aperi-cocktail</span></div><div class="mrow"><div class="mr-top"><span class="mr-name">Aperol Spritz</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-alg">allergeni: solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Hugo Spritz</span><span class="mr-dots"></span><span class="mr-price">8,00<span class="eu">€</span></span></div><div class="mr-alg">allergeni: solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Venturo Spritz</span><span class="mr-dots"></span><span class="mr-price">8,00<span class="eu">€</span></span></div><div class="mr-alg">allergeni: solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">P31 Spritz</span><span class="mr-dots"></span><span class="mr-price">8,00<span class="eu">€</span></span></div><div class="mr-alg">allergeni: solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Gin tonic</span><span class="mr-dots"></span><span class="mr-price">6,00<span class="eu">€</span></span></div><div class="mr-desc">Tanqueray</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Gin tonic Bombay</span><span class="mr-dots"></span><span class="mr-price">7,00<span class="eu">€</span></span></div><div class="mr-desc">Bombay</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Gin tonic Tanqueray Siviglia</span><span class="mr-dots"></span><span class="mr-price">8,00<span class="eu">€</span></span></div><div class="mr-desc">Tanqueray Siviglia</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Gin Mare</span><span class="mr-dots"></span><span class="mr-price">10,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Gin lemon</span><span class="mr-dots"></span><span class="mr-price">6,00<span class="eu">€</span></span></div><div class="mr-desc">Tanqueray</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Gin lemon Bombay</span><span class="mr-dots"></span><span class="mr-price">7,00<span class="eu">€</span></span></div><div class="mr-desc">Bombay</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Gin lemon Mare</span><span class="mr-dots"></span><span class="mr-price">10,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Gin London</span><span class="mr-dots"></span><span class="mr-price">8,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Vodka tonic</span><span class="mr-dots"></span><span class="mr-price">8,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Vodka lemon</span><span class="mr-dots"></span><span class="mr-price">8,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Campari</span><span class="mr-dots"></span><span class="mr-price">3,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Campari corretto</span><span class="mr-dots"></span><span class="mr-price">4,50<span class="eu">€</span></span></div></div></section><section class="bcat reveal" id="bibite"><div class="mc-head"><h4>Bibite &amp; birre</h4><span class="mc-note">il resto</span></div><div class="mrow"><div class="mr-top"><span class="mr-name">Acqua 50 cl</span><span class="mr-dots"></span><span class="mr-price">1,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Acqua 1 L</span><span class="mr-dots"></span><span class="mr-price">2,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Coca-Cola</span><span class="mr-dots"></span><span class="mr-price">3,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Coca-Cola zero</span><span class="mr-dots"></span><span class="mr-price">3,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Aranciata</span><span class="mr-dots"></span><span class="mr-price">3,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Crodino</span><span class="mr-dots"></span><span class="mr-price">3,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Cocktail San Pellegrino Bianco</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div><div class="mr-desc">analcolico</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Peroni</span><span class="mr-dots"></span><span class="mr-price">2,50<span class="eu">€</span></span></div><div class="mr-alg">allergeni: glutine</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Nastro Azzurro</span><span class="mr-dots"></span><span class="mr-price">3,00<span class="eu">€</span></span></div><div class="mr-alg">allergeni: glutine</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Tennent&#x27;s</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div><div class="mr-alg">allergeni: glutine</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Leffe rossa</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div><div class="mr-alg">allergeni: glutine</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Birra senza glutine</span><span class="mr-dots"></span><span class="mr-price">2,50<span class="eu">€</span></span></div></div></section><section class="bcat reveal" id="amari"><div class="mc-head"><h4>Grappe, amari, liquori</h4><span class="mc-note">per chiudere in bellezza</span></div><div class="mrow"><div class="mr-top"><span class="mr-name">Grappa bianca</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div><div class="mr-desc">Mantovani</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Grappa barricata</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div><div class="mr-desc">Mantovani</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Grappa al miele</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div><div class="mr-desc">Mantovani</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Grappa alla camomilla</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div><div class="mr-desc">Mantovani</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Amaro Montenegro</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Fernet-Branca</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Vecchio Amaro del Capo</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Fernet-Branca Menta</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Jefferson</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Limoncello</span><span class="mr-dots"></span><span class="mr-price">3,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Meloncello</span><span class="mr-dots"></span><span class="mr-price">3,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Amaretto Disaronno</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Passito</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div><div class="mr-alg">allergeni: solfiti</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Liquirizia</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div><div class="mr-desc">Mantovani</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Rosolio alla menta</span><span class="mr-dots"></span><span class="mr-price">4,00<span class="eu">€</span></span></div><div class="mr-desc">Mantovani</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Liquore caramello salato</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">Mantovani</div><div class="mr-alg">allergeni: latte e derivati</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Liquore cioccolato fondente</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Liquore cacao e nocciola</span><span class="mr-dots"></span><span class="mr-price">5,00<span class="eu">€</span></span></div><div class="mr-desc">Mantovani</div><div class="mr-alg">allergeni: frutta a guscio</div></div></section></div></div>
+    </div>
+  </details>
+</section>
+
+<!-- VINI -->
+<section class="vini" id="vini">
+  <details class="fasc" id="f-vini">
+    <summary><div class="wrap"><div class="mtitle"><span class="pill">La cantina</span><h2>Carta dei vini</h2><div class="sub">c&#x27;è sempre qualcosa da aprire</div><span class="segno" aria-hidden="true"></span></div></div></summary>
+    <div class="mgroup">
+      <nav class="catbar"><span class="lab">cantina ·</span><a href="#c-rossi">Rossi</a><a href="#c-bianchi">Bianchi</a><a href="#c-bollicine">Bollicine</a></nav>
+      <div class="wrap" style="padding-top:var(--s6)"><section class="mcat reveal" id="c-rossi"><div class="mc-head"><h3>Rossi</h3><span class="mc-note">veri, mai troppo educati</span></div><div class="mc-items"><div class="mrow"><div class="mr-top"><span class="mr-name">Perla Nera Montepulciano d&#x27;Abruzzo Riserva 2017 DOC bio<span class="new promo">promo</span></span><span class="mr-dots"></span><span class="mr-price">50,00<span class="eu">€</span></span></div><div class="mr-desc">Abruzzo</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Aglianico del Vulture Riserva DOC Campo Melgograno</span><span class="mr-dots"></span><span class="mr-price">36,00<span class="eu">€</span></span></div><div class="mr-desc">Basilicata</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Aglianico DOC</span><span class="mr-dots"></span><span class="mr-price">18,00<span class="eu">€</span></span></div><div class="mr-desc">Campania</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Taurasi DOCG Macchialupa</span><span class="mr-dots"></span><span class="mr-price">40,00<span class="eu">€</span></span></div><div class="mr-desc">Campania</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Gragnano DOP Frizzante</span><span class="mr-dots"></span><span class="mr-price">22,00<span class="eu">€</span></span></div><div class="mr-desc">Campania</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Moio 57</span><span class="mr-dots"></span><span class="mr-price">20,00<span class="eu">€</span></span></div><div class="mr-desc">Campania</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Buttafuoco Storico Vigna Casa del Corno DOC</span><span class="mr-dots"></span><span class="mr-price">55,00<span class="eu">€</span></span></div><div class="mr-desc">Lombardia</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Sangue di Giuda Giorgi</span><span class="mr-dots"></span><span class="mr-price">15,00<span class="eu">€</span></span></div><div class="mr-desc">Lombardia</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Amarone della Valpolicella DOCG Classico Riserva 2018</span><span class="mr-dots"></span><span class="mr-price">80,00<span class="eu">€</span></span></div><div class="mr-desc">Tenuta Santa Maria Bertani · Lombardia</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Valpolicella Ripasso DOC Classico Superiore 2020</span><span class="mr-dots"></span><span class="mr-price">35,00<span class="eu">€</span></span></div><div class="mr-desc">Tenuta Santa Maria Bertani · Lombardia</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Barolo DOCG</span><span class="mr-dots"></span><span class="mr-price">50,00<span class="eu">€</span></span></div><div class="mr-desc">Piemonte</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Barbaresco DOCG</span><span class="mr-dots"></span><span class="mr-price">42,00<span class="eu">€</span></span></div><div class="mr-desc">Piemonte</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Barbera d&#x27;Asti</span><span class="mr-dots"></span><span class="mr-price">22,00<span class="eu">€</span></span></div><div class="mr-desc">Piemonte</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Primitivo di Manduria DOC Bastioni</span><span class="mr-dots"></span><span class="mr-price">22,00<span class="eu">€</span></span></div><div class="mr-desc">Puglia</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Nipozzano Chianti</span><span class="mr-dots"></span><span class="mr-price">20,00<span class="eu">€</span></span></div><div class="mr-desc">Toscana</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Brunello di Montalcino Belpoggio</span><span class="mr-dots"></span><span class="mr-price">80,00<span class="eu">€</span></span></div><div class="mr-desc">Toscana</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Perpiero Toscana IGT 2019</span><span class="mr-dots"></span><span class="mr-price">85,00<span class="eu">€</span></span></div><div class="mr-desc">Toscana</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Apricaia 2019</span><span class="mr-dots"></span><span class="mr-price">150,00<span class="eu">€</span></span></div><div class="mr-desc">Toscana</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Collezione Privata</span><span class="mr-dots"></span><span class="mr-price">22,00<span class="eu">€</span></span></div><div class="mr-desc">Toscana</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Chianti Classico Riserva DOCG Poggio TEO</span><span class="mr-dots"></span><span class="mr-price">30,00<span class="eu">€</span></span></div><div class="mr-desc">Toscana</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Valiani Chianti Classico DOCG</span><span class="mr-dots"></span><span class="mr-price">22,00<span class="eu">€</span></span></div><div class="mr-desc">Toscana</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Brunello DOCG Riserva</span><span class="mr-dots"></span><span class="mr-price">90,00<span class="eu">€</span></span></div><div class="mr-desc">Villa Cortile · Toscana</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Brunello DOCG</span><span class="mr-dots"></span><span class="mr-price">60,00<span class="eu">€</span></span></div><div class="mr-desc">Villa Cortile · Toscana</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Vesper</span><span class="mr-dots"></span><span class="mr-price">38,00<span class="eu">€</span></span></div><div class="mr-desc">Toscana</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Sellaio Bolgheri</span><span class="mr-dots"></span><span class="mr-price">30,00<span class="eu">€</span></span></div><div class="mr-desc">Toscana</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Barrelaia</span><span class="mr-dots"></span><span class="mr-price">16,00<span class="eu">€</span></span></div><div class="mr-desc">Toscana</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Pinocchio</span><span class="mr-dots"></span><span class="mr-price">14,00<span class="eu">€</span></span></div><div class="mr-desc">Toscana</div></div></div></section><section class="mcat reveal" id="c-bianchi"><div class="mc-head"><h3>Bianchi</h3><span class="mc-note">freschi, di carattere</span></div><div class="mc-items"><div class="mrow"><div class="mr-top"><span class="mr-name">Langhe Bianco<span class="new promo">promo</span></span><span class="mr-dots"></span><span class="mr-price">16,00<span class="eu">€</span></span></div><div class="mr-desc">Piemonte</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Langhe Rosè<span class="new promo">promo</span></span><span class="mr-dots"></span><span class="mr-price">16,00<span class="eu">€</span></span></div><div class="mr-desc">Piemonte</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Perla Bianca Trebbiano d&#x27;Abruzzo DOC bio</span><span class="mr-dots"></span><span class="mr-price">45,00<span class="eu">€</span></span></div><div class="mr-desc">Abruzzo</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Vinosophia Abruzzo Pecorino DOC bio</span><span class="mr-dots"></span><span class="mr-price">19,00<span class="eu">€</span></span></div><div class="mr-desc">Abruzzo</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Vinosophia Passerina IGT Colline Pescaresi bio</span><span class="mr-dots"></span><span class="mr-price">19,00<span class="eu">€</span></span></div><div class="mr-desc">Abruzzo</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">DNA Bombino Colline Pescaresi IGT bio</span><span class="mr-dots"></span><span class="mr-price">25,00<span class="eu">€</span></span></div><div class="mr-desc">Abruzzo</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">In Petra Trebbiano d&#x27;Abruzzo DOC bio</span><span class="mr-dots"></span><span class="mr-price">40,00<span class="eu">€</span></span></div><div class="mr-desc">Abruzzo</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Gewürztraminer DOC</span><span class="mr-dots"></span><span class="mr-price">30,00<span class="eu">€</span></span></div><div class="mr-desc">Alto Adige</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Kerner DOC</span><span class="mr-dots"></span><span class="mr-price">30,00<span class="eu">€</span></span></div><div class="mr-desc">Alto Adige</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Pinot Grigio DOC</span><span class="mr-dots"></span><span class="mr-price">25,00<span class="eu">€</span></span></div><div class="mr-desc">Alto Adige</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Sylvaner DOC</span><span class="mr-dots"></span><span class="mr-price">25,00<span class="eu">€</span></span></div><div class="mr-desc">Alto Adige</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Müller Thurgau DOC</span><span class="mr-dots"></span><span class="mr-price">25,00<span class="eu">€</span></span></div><div class="mr-desc">Alto Adige</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Greco di Tufo DOCG 2023</span><span class="mr-dots"></span><span class="mr-price">18,00<span class="eu">€</span></span></div><div class="mr-desc">Campania</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Fiano di Avellino DOCG 2023</span><span class="mr-dots"></span><span class="mr-price">20,00<span class="eu">€</span></span></div><div class="mr-desc">Campania</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Falanghina Beneventano IGT</span><span class="mr-dots"></span><span class="mr-price">18,00<span class="eu">€</span></span></div><div class="mr-desc">Campania</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Falerno del Massico</span><span class="mr-dots"></span><span class="mr-price">15,00<span class="eu">€</span></span></div><div class="mr-desc">Campania</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Ribolla gialla</span><span class="mr-dots"></span><span class="mr-price">22,00<span class="eu">€</span></span></div><div class="mr-desc">Friuli Venezia Giulia · Col Talmasso</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Pinot Nero Giorgi VB DOC Frizzante</span><span class="mr-dots"></span><span class="mr-price">18,00<span class="eu">€</span></span></div><div class="mr-desc">Lombardia</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Il Bandito DOC</span><span class="mr-dots"></span><span class="mr-price">20,00<span class="eu">€</span></span></div><div class="mr-desc">Lombardia</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Etna DOC Scalunera Bianco</span><span class="mr-dots"></span><span class="mr-price">30,00<span class="eu">€</span></span></div><div class="mr-desc">Sicilia</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Rosè Pagano</span><span class="mr-dots"></span><span class="mr-price">30,00<span class="eu">€</span></span></div><div class="mr-desc">Sicilia</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Chardonnay</span><span class="mr-dots"></span><span class="mr-price">24,00<span class="eu">€</span></span></div><div class="mr-desc">Sicilia</div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Vermentino Brut</span><span class="mr-dots"></span><span class="mr-price">24,00<span class="eu">€</span></span></div><div class="mr-desc">Toscana · Tenuta Moraia</div></div></div></section><section class="mcat reveal" id="c-bollicine"><div class="mc-head"><h3>Bollicine</h3><span class="mc-note">per fare festa</span></div><div class="mc-items"><div class="mrow"><div class="mr-top"><span class="mr-name">Top Zero DOC</span><span class="mr-dots"></span><span class="mr-price">35,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Bellussì Blanc de Noir</span><span class="mr-dots"></span><span class="mr-price">25,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Prosecco DOC Rosè</span><span class="mr-dots"></span><span class="mr-price">25,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Belcanto Met. Classico Extra Brut 2017</span><span class="mr-dots"></span><span class="mr-price">45,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Rocca dei Forti</span><span class="mr-dots"></span><span class="mr-price">15,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Ca&#x27; Del Bosco Franciacorta</span><span class="mr-dots"></span><span class="mr-price">60,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Moët Ice Impérial</span><span class="mr-dots"></span><span class="mr-price">90,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Ferghettina Franciacorta Rosè</span><span class="mr-dots"></span><span class="mr-price">55,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Ferghettina Franciacorta Milledì</span><span class="mr-dots"></span><span class="mr-price">55,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Ferghettina Franciacorta Satèn</span><span class="mr-dots"></span><span class="mr-price">55,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Veuve Clicquot</span><span class="mr-dots"></span><span class="mr-price">80,00<span class="eu">€</span></span></div></div><div class="mrow"><div class="mr-top"><span class="mr-name">Chiuse Etna Rosè DOC</span><span class="mr-dots"></span><span class="mr-price">60,00<span class="eu">€</span></span></div></div></div></section></div>
+    </div>
+  </details>
+</section>
+
+<!-- SERATE -->
+<section class="serate" id="serate">
+  <details class="porta" id="p-serate">
+    <summary><div class="wrap"><div class="pt-head">
+      <span class="occhio">Le serate</span>
+      <h2>La sera, Vinicolo <em>si accende.</em></h2>
+      <span class="freccia" aria-hidden="true"></span>
+    </div></div></summary>
+    <div class="dentro">
+      <div class="wrap"><p class="intro reveal">Musica dal vivo, serate a tema, karaoke. Il calendario cambia ogni settimana.</p><div class="ser-wrap reveal"><div class="ser-track" id="serTrack"><article class="serata"><span class="loc-img"><img src="img/serata-birricolo.jpg?v=1787781580" alt="Birricolo, il festival della birra" loading="lazy"></span><div class="corpo"><div class="quando"><span class="gg">VEN</span><span class="num">18</span><span class="mese">settembre</span></div><span class="rig"></span><h3>Birricolo, il festival della birra</h3><p>Per una sera Vinicolo diventa Birricolo. Birre, panini e musica dal vivo, e il vino per una volta sta a guardare.</p><div class="azioni"><a class="loc" href="https://www.instagram.com/vinicolo.vineria/" target="_blank" rel="noopener">Guarda la locandina</a><a class="pren" href="https://www.instagram.com/vinicolo.vineria/" target="_blank" rel="noopener">Prenota</a></div></div></article><article class="serata"><div class="corpo"><div class="quando"><span class="gg">VEN</span><span class="num">14</span><span class="mese">novembre · 20:00</span></div><span class="rig"></span><h3>Degustazione: cinque calici dal Sud</h3><p>Cinque etichette raccontate una a una, con taglieri in abbinamento. Posti limitati.</p><div class="azioni"><a class="loc" href="https://www.instagram.com/vinicolo.vineria/" target="_blank" rel="noopener">Guarda la locandina</a><a class="pren" href="https://www.instagram.com/vinicolo.vineria/" target="_blank" rel="noopener">Prenota</a></div></div></article><article class="serata"><div class="corpo"><div class="quando"><span class="gg">SAB</span><span class="num">22</span><span class="mese">novembre · 21:30</span></div><span class="rig"></span><h3>Musica dal vivo, sere d&#x27;autunno</h3><p>Chitarra e voce, luci basse, un bicchiere in mano.</p><div class="azioni"><a class="loc" href="https://www.instagram.com/vinicolo.vineria/" target="_blank" rel="noopener">Guarda la locandina</a><a class="pren" href="https://www.instagram.com/vinicolo.vineria/" target="_blank" rel="noopener">Prenota</a></div></div></article></div><div class="ser-nav-row"><button class="ser-nav prev" type="button" aria-label="Serate precedenti">&#8592;</button><button class="ser-nav next" type="button" aria-label="Serate successive">&#8594;</button></div></div></div>
+    </div>
+  </details>
+</section>
+
+<!-- EVENTO -->
+<section class="evento" id="evento">
+  <details class="porta" id="p-evento">
+    <summary><div class="wrap"><div class="pt-head">
+      <span class="occhio">Festeggia da Vinicolo</span>
+      <h2>Il posto giusto per <em>la tua serata.</em></h2>
+      <span class="freccia" aria-hidden="true"></span>
+    </div></div></summary>
+    <div class="dentro"><div class="wrap">
+    <div class="ev-top reveal">
+      <p>Compleanni, cene di gruppo, un brindisi che conta. Da noi si sta comodi, si mangia bene e si beve meglio. Dimmi che occasione è, al resto pensiamo noi.</p>
+    </div>
+    <div class="ev-steps reveal">
+      <div class="step"><span class="num">01</span><h3>Pacchetti fissi</h3><p>Chiari, senza pensieri, tutto incluso.</p></div><div class="step"><span class="num">02</span><h3>Su misura</h3><p>Come piace a te, dal menù ai brindisi.</p></div><div class="step"><span class="num">03</span><h3>Insieme</h3><p>Ci vediamo, ci racconti l&#x27;occasione, e organizziamo tutto noi.</p></div>
+    </div>
+    <div class="ev-cta reveal">
+      <a class="btn gold" href="https://www.instagram.com/vinicolo.vineria/" target="_blank" rel="noopener">Scrivici su Instagram</a>
+      <a class="btn lineC" href="tel:+3908231540345">Chiama</a>
+    </div>
+    </div></div>
+  </details>
+</section>
+
+<!-- NELL'ATTESA -->
+<section class="giochi" id="giochi">
+  <details class="porta" id="p-giochi">
+    <summary><div class="wrap"><div class="pt-head">
+      <span class="occhio">Nell&#x27;attesa</span>
+      <h2>Si aspetta? <em>Si gioca.</em></h2>
+      <span class="freccia" aria-hidden="true"></span>
+    </div></div></summary>
+    <div class="dentro"><div class="wrap">
+    <div class="gtop reveal"><p>Mentre arriva il tagliere, prendi il telefono. Giochi fatti in casa, come tutto il resto.</p></div>
+    <div class="gcards">
+      <a class="gcard live reveal" href="giochi/bicchieri.html"><div><div class="gc-k">gioco 01</div><h3>Acchiappa il bicchiere</h3><p>Acchiappa i calici, evita il conto.</p></div><span class="gc-go">Gioca &rarr;</span></a><a class="gcard live reveal" href="giochi/straccetti.html"><div><div class="gc-k">gioco 02</div><h3>Straccetti</h3><p>Acchiappa gli straccetti in tutto il locale, scappa dal conto, bevi un calice e ribalta il gioco.</p></div><span class="gc-go">Gioca &rarr;</span></a><a class="gcard live reveal" href="giochi/bowling.html"><div><div class="gc-k">gioco 03</div><h3>Bowling delle bottiglie</h3><p>Fai rotolare il tappo di sughero e abbatti le bottiglie. Dieci frame, come al bowling vero.</p></div><span class="gc-go">Gioca &rarr;</span></a>
+    </div>
+    </div></div>
+  </details>
+</section>
+
+<!-- PRIMA DI ANDARE -->
+<section class="bye" id="find">
+  <div class="wrap reveal">
+    <div class="k">prima di andare</div>
+    <h2>Se ti sei trovato bene,<br><u>scrivilo su Google.</u></h2>
+    <div class="cta">
+      <a class="btn burg" href="https://www.google.com/maps?cid=14378738613722627755" target="_blank" rel="noopener">Lascia una recensione</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="top"><span class="mk"><img src="img/seal.png" alt="Vinicolo Vineria"></span><div><div class="wm">Vinicolo</div><div class="tw">vineria &amp; cucina</div></div></div>
+    <div class="cols">
+      <div class="col"><div class="l">Dove</div><div class="v"><a href="https://maps.google.com/?q=Vinicolo+Vineria+Via+Carlo+Santagata+73+Santa+Maria+Capua+Vetere" target="_blank" rel="noopener">Via Carlo Santagata, 73<br>Santa Maria Capua Vetere (CE)</a></div></div>
+      <div class="col"><div class="l">Quando</div><div class="v">Aperivino dalle 18:30 alle 20:00<br><span class="dim">poi fino a tardi · chiuso il mercoledì</span></div></div>
+      <div class="col"><div class="l">Sentiamoci</div><div class="v"><a href="tel:+3908231540345">0823 1540345</a><br><a href="mailto:ilvinicolo@gmail.com">ilvinicolo@gmail.com</a></div></div>
+      <div class="col"><div class="l">Social</div><div class="v"><a href="https://www.instagram.com/vinicolo.vineria/" target="_blank" rel="noopener">Instagram</a><br><a href="https://www.facebook.com/VinicoloVineria" target="_blank" rel="noopener">Facebook</a></div></div>
+    </div>
+    <div class="lg"><span>© 2026 Vinicolo Vineria · SMCV · Italia</span><span class="sig">come a casa, ma senza sbatti.</span></div>
+  </div>
+</footer>
+
+<script>
+  const mm=document.getElementById('mm');
+  document.getElementById('burger').onclick=()=>mm.classList.add('open');
+  document.getElementById('xmm').onclick=()=>mm.classList.remove('open');
+  mm.querySelectorAll('a').forEach(a=>a.onclick=()=>mm.classList.remove('open'));
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // serate: le frecce fanno scorrere le card di una alla volta
+  (function(){
+    var t=document.getElementById('serTrack');
+    if(!t) return;
+    var prev=document.querySelector('.ser-nav.prev'), next=document.querySelector('.ser-nav.next');
+    function passo(){
+      var c=t.querySelector('.serata'); if(!c) return 300;
+      var st=getComputedStyle(t), g=parseFloat(st.columnGap||st.gap||'20')||20;
+      return c.getBoundingClientRect().width + g;
+    }
+    function aggiorna(){
+      if(!prev||!next) return;
+      var fine = t.scrollWidth - t.clientWidth;
+      prev.disabled = t.scrollLeft < 8;
+      next.disabled = t.scrollLeft > fine - 8;
+    }
+    if(prev) prev.addEventListener('click', function(){ t.scrollBy({left:-passo(), behavior:'smooth'}); });
+    if(next) next.addEventListener('click', function(){ t.scrollBy({left: passo(), behavior:'smooth'}); });
+    t.addEventListener('scroll', aggiorna, {passive:true});
+    addEventListener('resize', aggiorna);
+    aggiorna();
+  })();
+
+  // fascicoli: se ne apri uno, gli altri si chiudono
+  const fasc=[...document.querySelectorAll('details.fasc, details.porta')];
+  const ALIAS={'#menu':'f-cucina','#dabere':'f-bar','#vini':'f-vini','#serate':'p-serate','#evento':'p-evento','#giochi':'p-giochi'};
+  // chiudendo una striscia aperta si tolgono migliaia di pixel sopra di noi:
+  // senza rimettere a posto lo scorrimento si finisce molto piu in basso.
+  // Niente animazione, una scivolata di 6000 px confonde e basta.
+  function inCima(d){
+    const r=document.documentElement, prima=r.style.scrollBehavior;
+    r.style.scrollBehavior='auto';
+    d.scrollIntoView({block:'start'});
+    r.style.scrollBehavior=prima;
+  }
+  fasc.forEach(f=>f.addEventListener('toggle',()=>{
+    if(!f.open) return;
+    let chiusa=false;
+    fasc.forEach(o=>{ if(o!==f && o.open){ o.open=false; chiusa=true; } });
+    if(chiusa) inCima(f);
+    f.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+  }));
+  // un collegamento che punta dentro un fascicolo chiuso lo apre e ci porta
+  function bersaglio(h){
+    const d = ALIAS[h] ? document.getElementById(ALIAS[h]) : null;
+    const t = (()=>{ try{ return document.querySelector(h); }catch(e){ return null; } })();
+    return { d: d || (t ? t.closest('details.fasc, details.porta') : null), t: t };
+  }
+  function vaiA(h, subito){
+    const {d,t} = bersaglio(h);
+    if(!d) return false;
+    const eraChiuso = !d.open;
+    if(eraChiuso) d.open = true;
+    const dove = t && d.contains(t) ? t : d;
+    // subito = arrivo diretto con l'ancora: di netto, se no si accavalla al salto del browser
+    if(subito) setTimeout(()=>inCima(dove), 0);
+    else setTimeout(()=>dove.scrollIntoView({behavior:'smooth', block:'start'}), 90);
+    return eraChiuso;
+  }
+  document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{
+    const h=a.getAttribute('href');
+    if(!h || h.length<2) return;
+    const {d}=bersaglio(h);
+    if(!d || d.open) return;            // gia aperto o non e un fascicolo: fa il browser
+    e.preventDefault();
+    if(history.replaceState) history.replaceState(null,'',h);
+    vaiA(h,false);
+  }));
+  addEventListener('hashchange',()=>vaiA(location.hash,false));
+  if(location.hash && location.hash.length>1){
+    vaiA(location.hash,true);
+    // il salto automatico del browser e' morbido, quindi finisce dopo il nostro e vince lui:
+    // non tiene conto del margine e taglia la testata. Rimettiamo a posto a pagina assestata,
+    // ma non se nel frattempo ha gia' scorso l'utente.
+    let toccato=false;
+    ['wheel','touchstart','keydown'].forEach(e=>addEventListener(e,()=>{toccato=true;},{passive:true,once:true}));
+    const rimetti=()=>{
+      if(toccato) return;
+      const {d,t}=bersaglio(location.hash);
+      const dove = (t && d && d.contains(t)) ? t : d;
+      if(dove) inCima(dove);
+    };
+    addEventListener('load',()=>setTimeout(rimetti,120));
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>setTimeout(rimetti,120));
+  }
+  // barre categorie: attiva + auto-scroll orizzontale
+  document.querySelectorAll('.catbar').forEach(bar=>{
+    const links=[...bar.querySelectorAll('a')];
+    const secs=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+    const upd=()=>{let i=-1;secs.forEach((c,k)=>{if(c&&c.getBoundingClientRect().top<120)i=k});links.forEach(l=>l.classList.remove('on'));if(i>=0&&links[i]){links[i].classList.add('on');bar.scrollTo({left:links[i].offsetLeft-56,behavior:'smooth'})}};
+    addEventListener('scroll',upd,{passive:true});upd();
+  });
+</script>
+</body>
+</html>
