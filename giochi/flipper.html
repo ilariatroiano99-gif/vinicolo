@@ -14,9 +14,9 @@
     align-items:center;height:100svh;overflow:hidden;user-select:none;-webkit-user-select:none;
     padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
   a{color:var(--gold)}
-  .top{width:100%;max-width:520px;height:62px;flex:0 0 62px;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+  .top{width:100%;max-width:560px;height:46px;flex:0 0 46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
   .back{font-size:.82rem;text-decoration:none;color:var(--cream);opacity:.75}
-  .mute{background:none;border:1px solid rgba(244,237,226,.25);color:var(--cream);width:38px;height:38px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.85}
+  .mute{background:none;border:1px solid rgba(244,237,226,.25);color:var(--cream);width:34px;height:34px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.85}
   .score{width:100%;max-width:520px;height:56px;flex:0 0 56px;padding:0 14px 8px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;overflow:hidden}
   .score .cell{display:flex;flex-direction:column;gap:2px;min-width:0}
   .score .cell.r{align-items:flex-end}
@@ -26,11 +26,11 @@
   .tappi{display:flex;gap:4px;align-items:center;height:16px}
   .tappo{width:11px;height:14px;border-radius:3px;background:linear-gradient(180deg,#d8a46a,#a9713c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.3)}
   .tappo.off{opacity:.2}
-  .stage{position:relative;flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;width:100%;padding:0 10px}
-  canvas{display:block;height:100%;width:auto;max-width:100%;touch-action:none;border-radius:10px;
-    box-shadow:0 12px 44px rgba(0,0,0,.6)}
-  .hint{width:100%;max-width:520px;height:48px;flex:0 0 48px;display:flex;align-items:center;justify-content:center;
-    text-align:center;font-size:.78rem;line-height:1.25;opacity:.7;padding:0 16px}
+  .stage{position:relative;flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;width:100%;padding:0}
+  canvas{display:block;width:auto;height:auto;max-width:100%;max-height:100%;touch-action:none;
+    border-radius:8px;box-shadow:0 10px 38px rgba(0,0,0,.6)}
+  .hint{width:100%;max-width:560px;height:38px;flex:0 0 38px;display:flex;align-items:center;justify-content:center;
+    text-align:center;font-size:.75rem;line-height:1.2;opacity:.65;padding:0 14px}
   .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
     background:rgba(18,7,4,.93);backdrop-filter:blur(3px);border-radius:10px;padding:26px;gap:14px}
   .overlay.hide{display:none}
@@ -51,23 +51,8 @@
     <button class="mute" id="mute" aria-label="Audio"></button>
   </div>
 
-  <div class="score">
-    <div class="cell">
-      <span class="lbl">Punti</span>
-      <span class="val" id="punti">0</span>
-    </div>
-    <div class="cell">
-      <span class="lbl" id="statoLbl">Moltiplicatore</span>
-      <span class="val sm" id="stato">x1</span>
-    </div>
-    <div class="cell r">
-      <span class="lbl">Record <b id="record">0</b></span>
-      <span class="tappi" id="tappi"></span>
-    </div>
-  </div>
-
   <div class="stage">
-    <canvas id="game" width="520" height="880"></canvas>
+    <canvas id="game" width="520" height="1024"></canvas>
 
     <div class="overlay" id="overlay">
       <h1>Il flipper <em>della tavola</em></h1>
@@ -97,7 +82,9 @@
    non attraversa i muri nemmeno quando va forte.
    ══════════════════════════════════════════════════════════════════ */
 
-var W = 520, H = 880;
+var W = 520, H = 880;          // il tavolo, in unita' sue
+var HTELA = 1024;              // la tela: tavolo piu' cruscotto in cima
+var PIANO_Y = HTELA - H;       // dove comincia il tavolo dentro la tela
 var cv = document.getElementById("game");
 var cx = cv.getContext("2d");
 
@@ -217,11 +204,16 @@ function costruisciTavolo(){
   muro(76, 782, 140, 792, {r:4, rimb:0.22});
   muro(396, 782, 332, 792, {r:4, rimb:0.22});
 
-  // il tagliere e' un ostacolo vero: senza, il tappo passava in mezzo al tavolo
-  // e cadeva sempre nel vuoto fra le alette, venti volte su venti
-  perno(236, 626, 80, {rimb:0.44, tipo:"tagliere"});
-  // un paletto sopra, che sdoppia il tappo a destra o a sinistra
+  // Il tagliere resta a filo del piano e il tappo ci rotola sopra accendendo
+  // le fette: su un flipper vero il centro e' libero, se no il tiro dal centro
+  // rimbalza subito giu' e non c'e' gioco. A tenere viva la pallina ci pensano
+  // i respingenti in alto, le rampe e le fionde.
+  // Paletti che deviano senza chiudere la corsia centrale:
   perno(236, 500, 9, {rimb:0.62});
+  perno(158, 588, 10, {rimb:0.66});
+  perno(314, 588, 10, {rimb:0.66});
+  perno(196, 690, 9, {rimb:0.66});
+  perno(276, 690, 9, {rimb:0.66});
 
   // paletti alti, sotto i bersagli
   perno(120, 300, 8, {rimb:0.55});
@@ -392,17 +384,9 @@ function avviso(testo){
   if(G.messaggi.length > 3) G.messaggi.shift();
 }
 function aggiornaPannello(){
-  document.getElementById("punti").textContent = G.punti.toLocaleString("it-IT");
-  document.getElementById("record").textContent = G.record.toLocaleString("it-IT");
-  var st = document.getElementById("stato"), lb = document.getElementById("statoLbl");
-  if(G.tilt){ lb.textContent = "Tavolo"; st.textContent = "TILT"; }
-  else if(palle.length > 1){ lb.textContent = "In gioco"; st.textContent = palle.length + " tappi"; }
-  else if(G.rampeAccese > 0){ lb.textContent = "Rampe"; st.textContent = "accese"; }
-  else { lb.textContent = "Moltiplicatore"; st.textContent = "x" + G.molt; }
-  var t = document.getElementById("tappi"), s = "";
-  for(var i = 0; i < 3; i++) s += '<span class="tappo' + (i < G.tappi ? "" : " off") + '"></span>';
-  t.innerHTML = s;
+  // il punteggio ora si disegna nel cruscotto, non c'e' piu' niente in HTML
 }
+
 
 /* ══════════════════════════════════════════════════════════════════
    EVENTI DI GIOCO
@@ -962,14 +946,10 @@ function disegnaTagliere(){
   cx.save();
   cx.translate(236, 626);
 
-  ombra(4, 8, 14, 0.6, function(){
-    cx.fillStyle = "#3a2110";
-    cx.beginPath(); cx.arc(0, 0, 80, 0, Math.PI*2); cx.fill();
-  });
-
-  // spessore del legno
-  cx.fillStyle = "#38200f";
-  cx.beginPath(); cx.arc(0, 5, 80, 0, Math.PI*2); cx.fill();
+  // incassato nel piano: il tappo ci rotola sopra, quindi niente spessore.
+  // Un solco scuro tutt'intorno e l'ombra INTERNA dalla parte della luce.
+  cx.fillStyle = "rgba(8,3,6,.55)";
+  cx.beginPath(); cx.arc(0, 0, 82, 0, Math.PI*2); cx.fill();
 
   var g = cx.createRadialGradient(-26, -30, 8, 0, 0, 90);
   g.addColorStop(0, "#8a5730"); g.addColorStop(0.68, C.legno); g.addColorStop(1, "#40240f");
@@ -984,9 +964,16 @@ function disegnaTagliere(){
   }
   cx.restore();
 
-  cx.beginPath(); cx.arc(0, 0, 78, 0, Math.PI*2); contorno(2.4);
-  cx.strokeStyle = "rgba(255,222,180,.16)"; cx.lineWidth = 2;
-  cx.beginPath(); cx.arc(0, 0, 74, Math.PI*1.05, Math.PI*1.75); cx.stroke();
+  // ombra interna in alto a sinistra e luce in basso a destra: cosi' il
+  // tagliere sembra scavato dentro il piano invece che appoggiato sopra
+  cx.save();
+  cx.beginPath(); cx.arc(0, 0, 78, 0, Math.PI*2); cx.clip();
+  cx.strokeStyle = "rgba(6,2,5,.45)"; cx.lineWidth = 7;
+  cx.beginPath(); cx.arc(0, 0, 76, Math.PI*0.95, Math.PI*1.85); cx.stroke();
+  cx.strokeStyle = "rgba(255,232,196,.14)"; cx.lineWidth = 5;
+  cx.beginPath(); cx.arc(0, 0, 76, Math.PI*0.02, Math.PI*0.82); cx.stroke();
+  cx.restore();
+  cx.beginPath(); cx.arc(0, 0, 78, 0, Math.PI*2); contorno(2);
 
   // le fette, che compaiono davvero sul tagliere
   fette.forEach(function(f, i){
@@ -1718,9 +1705,84 @@ function disegnaMessaggi(){
   cx.restore();
 }
 
+
+/* ── il cruscotto sopra il tavolo ────────────────────────────────────────── */
+function disegnaCruscotto(){
+  var h = PIANO_Y;
+  cx.save();
+  // legno della cassa
+  var g = cx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, "#2e1620"); g.addColorStop(1, "#190c12");
+  cx.fillStyle = g; cx.fillRect(0, 0, W, h);
+
+  // pannello interno
+  var px = 26, py = 16, pw = W - 52, ph = h - 30;
+  var gp = cx.createLinearGradient(0, py, 0, py + ph);
+  gp.addColorStop(0, "#4c1e36"); gp.addColorStop(1, "#2b1020");
+  cx.fillStyle = gp;
+  cx.beginPath();
+  if(cx.roundRect) cx.roundRect(px, py, pw, ph, 10); else cx.rect(px, py, pw, ph);
+  cx.fill();
+  cx.strokeStyle = "rgba(232,178,74,.55)"; cx.lineWidth = 2; cx.stroke();
+  cx.strokeStyle = "rgba(255,240,210,.16)"; cx.lineWidth = 1;
+  cx.beginPath();
+  if(cx.roundRect) cx.roundRect(px+4, py+4, pw-8, ph-8, 7); else cx.rect(px+4, py+4, pw-8, ph-8);
+  cx.stroke();
+
+  cx.textBaseline = "alphabetic";
+  // punti, grandi
+  cx.textAlign = "left";
+  cx.fillStyle = "rgba(244,237,226,.55)";
+  cx.font = "600 10px -apple-system, Helvetica, sans-serif";
+  cx.fillText("P U N T I", px + 20, py + 30);
+  cx.fillStyle = C.oroChiaro;
+  cx.font = "700 42px Georgia, serif";
+  cx.fillText(G.punti.toLocaleString("it-IT"), px + 18, py + 76);
+
+  // stato al centro
+  var etichetta, valore;
+  if(G.tilt){ etichetta = "TAVOLO"; valore = "TILT"; }
+  else if(palle.length > 1){ etichetta = "IN GIOCO"; valore = palle.length + " TAPPI"; }
+  else if(G.rampeAccese > 0){ etichetta = "RAMPE"; valore = "ACCESE"; }
+  else { etichetta = "MOLTIPLICATORE"; valore = "x" + G.molt; }
+  cx.textAlign = "center";
+  cx.fillStyle = "rgba(244,237,226,.5)";
+  cx.font = "600 9px -apple-system, Helvetica, sans-serif";
+  cx.fillText(etichetta, W/2 + 42, py + 30);
+  cx.fillStyle = G.tilt ? "#e0668f" : C.crema;
+  cx.font = "700 17px Georgia, serif";
+  cx.fillText(valore, W/2 + 42, py + 52);
+
+  // record e tappi
+  cx.textAlign = "right";
+  cx.fillStyle = "rgba(244,237,226,.5)";
+  cx.font = "600 9px -apple-system, Helvetica, sans-serif";
+  cx.fillText("RECORD " + G.record.toLocaleString("it-IT"), px + pw - 20, py + 30);
+  for(var i = 0; i < 3; i++){
+    var tx = px + pw - 20 - i*17, acceso = i < G.tappi;
+    cx.save();
+    cx.fillStyle = acceso ? sfera(tx-5, py + 48, 6, "#f0d49a", "#8c5c26") : "rgba(244,237,226,.14)";
+    cx.beginPath(); cx.arc(tx - 5, py + 48, 6, 0, Math.PI*2); cx.fill();
+    if(acceso){
+      cx.strokeStyle = "rgba(76,28,50,.7)"; cx.lineWidth = 1.2;
+      cx.beginPath(); cx.moveTo(tx-7.5, py+46); cx.lineTo(tx-5, py+51); cx.lineTo(tx-2.5, py+46); cx.stroke();
+    }
+    cx.restore();
+  }
+  cx.textAlign = "right";
+  cx.fillStyle = "rgba(244,237,226,.4)";
+  cx.font = "600 8px -apple-system, Helvetica, sans-serif";
+  cx.fillText("TAPPI", px + pw - 20, py + 70);
+
+  cx.restore();
+}
+
 /* ── il quadro completo ─────────────────────────────────────────── */
 function disegna(){
+  cx.clearRect(0, 0, W, HTELA);
+  disegnaCruscotto();
   cx.save();
+  cx.translate(0, PIANO_Y);
   if(G.scossa > 0) cx.translate(G.scossaX * 5 * G.scossa, 0);
   disegnaCassa();
   disegnaPiano();
@@ -1743,7 +1805,6 @@ function disegna(){
   disegnaApron();
   disegnaMessaggi();
   disegnaTarghe();
-  cx.restore();
 
   // vetro: un velo di luce sul piano
   var vg = cx.createLinearGradient(60, 40, 460, 800);
@@ -1759,6 +1820,7 @@ function disegna(){
   cx.strokeRect(20, 20, W-40, H-40);
   cx.strokeStyle = "rgba(0,0,0,.5)"; cx.lineWidth = 2;
   cx.strokeRect(21.5, 21.5, W-43, H-43);
+  cx.restore();
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -1811,7 +1873,7 @@ cv.addEventListener("touchstart", function(e){
   e.preventDefault();
   for(var i = 0; i < e.changedTouches.length; i++){
     var t = e.changedTouches[i], p = puntoTocco(t);
-    if(G.fase === "carica" && p.y > 0.72){ G.caricando = true; tocchi[t.identifier] = "carica"; }
+    if(G.fase === "carica" && p.y > 0.80){ G.caricando = true; tocchi[t.identifier] = "carica"; }
     else if(p.x < 0.5){ premiAletta("sx", true); tocchi[t.identifier] = "sx"; }
     else { premiAletta("dx", true); tocchi[t.identifier] = "dx"; }
   }
@@ -1834,7 +1896,7 @@ cv.addEventListener("touchcancel", function(e){
 cv.addEventListener("mousedown", function(e){
   var r = cv.getBoundingClientRect();
   var px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
-  if(G.fase === "carica" && py > 0.72){ G.caricando = true; }
+  if(G.fase === "carica" && py > 0.80){ G.caricando = true; }
   else if(px < 0.5) premiAletta("sx", true);
   else premiAletta("dx", true);
 });
