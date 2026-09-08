@@ -11,12 +11,13 @@
   html,body{height:100%}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     background:radial-gradient(120% 80% at 50% 0%,#2a140c,#120704 70%);color:var(--cream);display:flex;flex-direction:column;
-    align-items:center;min-height:100svh;overflow:hidden;user-select:none;-webkit-user-select:none}
+    align-items:center;height:100svh;overflow:hidden;user-select:none;-webkit-user-select:none;
+    padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
   a{color:var(--gold)}
-  .top{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;padding:12px 16px calc(env(safe-area-inset-top))}
+  .top{width:100%;max-width:520px;height:62px;flex:0 0 62px;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
   .back{font-size:.82rem;text-decoration:none;color:var(--cream);opacity:.75}
   .mute{background:none;border:1px solid rgba(244,237,226,.25);color:var(--cream);width:38px;height:38px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.85}
-  .score{width:100%;max-width:520px;padding:0 14px 8px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+  .score{width:100%;max-width:520px;height:56px;flex:0 0 56px;padding:0 14px 8px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;overflow:hidden}
   .score .cell{display:flex;flex-direction:column;gap:2px;min-width:0}
   .score .cell.r{align-items:flex-end}
   .lbl{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;opacity:.62;white-space:nowrap}
@@ -28,7 +29,8 @@
   .stage{position:relative;flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;width:100%;padding:0 10px}
   canvas{display:block;height:100%;width:auto;max-width:100%;touch-action:none;border-radius:10px;
     box-shadow:0 12px 44px rgba(0,0,0,.6)}
-  .hint{width:100%;max-width:520px;text-align:center;font-size:.8rem;opacity:.7;padding:8px 16px calc(8px + env(safe-area-inset-bottom));min-height:1.2em}
+  .hint{width:100%;max-width:520px;height:48px;flex:0 0 48px;display:flex;align-items:center;justify-content:center;
+    text-align:center;font-size:.78rem;line-height:1.25;opacity:.7;padding:0 16px}
   .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
     background:rgba(18,7,4,.93);backdrop-filter:blur(3px);border-radius:10px;padding:26px;gap:14px}
   .overlay.hide{display:none}
@@ -82,7 +84,7 @@
     </div>
   </div>
 
-  <div class="hint" id="hint">Tieni premuto in basso per caricare, molla per lanciare.</div>
+  <div class="hint" id="hint">Tieni premuto in basso, poi molla per lanciare.</div>
 
 <script>
 (function(){
@@ -157,13 +159,17 @@ var luciArco = [];  // le etichette del bancone
 var fette = [];     // la corona del tagliere
 var fionde = [];    // gli spicchi di formaggio
 
+var GRUPPO = 0;
 function muro(ax, ay, bx, by, opt){
   opt = opt || {};
-  muri.push({ax:ax, ay:ay, bx:bx, by:by, r:opt.r||0, rimb:opt.rimb===undefined?0.36:opt.rimb, tipo:opt.tipo||"muro"});
+  muri.push({ax:ax, ay:ay, bx:bx, by:by, r:opt.r||0,
+             rimb:opt.rimb===undefined?0.36:opt.rimb, tipo:opt.tipo||"muro",
+             gruppo: opt.gruppo !== undefined ? opt.gruppo : ++GRUPPO});
 }
 function arco(ccx, ccy, rad, da, a, passo, opt){
-  // da e a in gradi; genera una catena di segmenti
+  // da e a in gradi; genera una catena di segmenti, tutti dello stesso gruppo
   passo = passo || 6;
+  opt = opt || {}; opt.gruppo = ++GRUPPO;
   var prev = null;
   for(var g = da; g <= a + 0.001; g += passo){
     var t = g * Math.PI / 180;
@@ -192,7 +198,7 @@ function costruisciTavolo(){
   muro(16, 300, 16, 838, {rimb:0.30});           // muro esterno sinistro
   muro(64, 300, 64, 430, {rimb:0.30});           // canale sinistro, parete interna
   muro(504, 300, 504, 856, {rimb:0.30});         // muro esterno destro
-  muro(456, 300, 456, 838, {rimb:0.30});         // canale di lancio, parete sinistra
+  muro(456, 300, 456, 856, {rimb:0.30});         // canale di lancio, parete sinistra
   muro(456, 856, 504, 856, {rimb:0.10});         // fondo del canale di lancio
 
   // scivolo all'uscita del canale sinistro: prende tutta la larghezza del
@@ -204,22 +210,29 @@ function costruisciTavolo(){
   muro(456, 838, 344, 876, {rimb:0.20});
 
   // separatori corsia esterna / corsia interna
-  muro(76, 700, 116, 826, {r:4, rimb:0.30});
-  muro(444, 700, 404, 826, {r:4, rimb:0.30});
+  muro(54, 640, 76, 782, {r:4, rimb:0.30});
+  muro(418, 640, 396, 782, {r:4, rimb:0.30});
+  // pavimento della corsia interna: senza, il tappo scendeva a fianco
+  // dell'aletta e cadeva nel vuoto senza nemmeno sfiorarla
+  muro(76, 782, 140, 792, {r:4, rimb:0.22});
+  muro(396, 782, 332, 792, {r:4, rimb:0.22});
 
-  // paletti attorno al tagliere
-  perno(236, 516, 9, {rimb:0.62});
-  perno(160, 646, 9, {rimb:0.62});
-  perno(312, 646, 9, {rimb:0.62});
+  // il tagliere e' un ostacolo vero: senza, il tappo passava in mezzo al tavolo
+  // e cadeva sempre nel vuoto fra le alette, venti volte su venti
+  perno(236, 626, 80, {rimb:0.44, tipo:"tagliere"});
+  // un paletto sopra, che sdoppia il tappo a destra o a sinistra
+  perno(236, 500, 9, {rimb:0.62});
 
   // paletti alti, sotto i bersagli
   perno(120, 300, 8, {rimb:0.55});
   perno(352, 300, 8, {rimb:0.55});
 
   // spicchi di formaggio (fionde): tre lati, quello attivo e' il primo
+  // specchiati rispetto al centro del campo (x=236): prima quello destro era
+  // molto piu' vicino al muro e il tappo cadeva quasi sempre a sinistra
   fionde = [
-    {ax:96, ay:684, bx:162, by:726, cx:96, cy:756, lato:"sx", flash:0},
-    {ax:424, ay:684, bx:358, by:726, cx:424, cy:756, lato:"dx", flash:0}
+    {ax:104, ay:678, bx:176, by:722, cx:108, cy:754, lato:"sx", flash:0},
+    {ax:368, ay:678, bx:296, by:722, cx:364, cy:754, lato:"dx", flash:0}
   ];
   fionde.forEach(function(f){
     muro(f.ax, f.ay, f.bx, f.by, {rimb:0.30, tipo:"fionda"});
@@ -310,8 +323,8 @@ function nuovoTappo(x, y, vx, vy){
 // varco fra le punte: 28 unita' contro 22 di tappo. Con 21 il tappo ci si
 // incastrava sopra invece di cadere.
 var alette = [
-  {px:150, py:792, len:74, r:9, a:0, riposo: 32*Math.PI/180, su:-26*Math.PI/180, w:0, giu:false, lato:"sx"},
-  {px:322, py:792, len:74, r:9, a:0, riposo:(180-32)*Math.PI/180, su:(180+26)*Math.PI/180, w:0, giu:false, lato:"dx"}
+  {px:150, py:792, len:74, r:9, a:0, riposo: 32*Math.PI/180, su:-26*Math.PI/180, w:0, carica:0, giu:false, lato:"sx"},
+  {px:322, py:792, len:74, r:9, a:0, riposo:(180-32)*Math.PI/180, su:(180+26)*Math.PI/180, w:0, carica:0, giu:false, lato:"dx"}
 ];
 alette.forEach(function(f){ f.a = f.riposo; });
 
@@ -319,7 +332,7 @@ alette.forEach(function(f){ f.a = f.riposo; });
    FISICA
    ══════════════════════════════════════════════════════════════════ */
 
-var GRAV = 900;         // unita' al secondo quadrato
+var GRAV = 800;         // unita' al secondo quadrato
 var SOTTOPASSI = 8;
 
 function contattoSegmento(b, s){
@@ -343,6 +356,15 @@ function contattoCerchio(b, c){
   if(d > raggio) return null;
   if(d < 0.0001){ nx = 0; ny = -1; d = 0.0001; }
   return {nx:nx/d, ny:ny/d, pen:raggio - d, px:c.x + nx/d*c.r, py:c.y + ny/d*c.r};
+}
+
+function sbanda(k, quanto){
+  // ruota di poco la normale: senza, ogni lancio fa lo stesso identico giro
+  var a = (Math.random()*2 - 1) * quanto;
+  var c = Math.cos(a), s2 = Math.sin(a);
+  var nx = k.nx*c - k.ny*s2, ny = k.nx*s2 + k.ny*c;
+  k.nx = nx; k.ny = ny;
+  return k;
 }
 
 function rispondi(b, k, rimb, spinta){
@@ -475,14 +497,20 @@ function togliConto(){
    ══════════════════════════════════════════════════════════════════ */
 
 function passo(dt){
-  // alette: vanno a velocita' costante verso la posizione voluta
+  // alette: vanno a velocita' costante verso la posizione voluta.
+  // La "carica" resta viva ancora un attimo dopo che l'aletta e' arrivata su:
+  // senza, la finestra utile e' 30 millesimi di secondo e nessuno la prende.
   alette.forEach(function(f){
     var meta = (f.giu && !G.tilt) ? f.su : f.riposo;
-    var passoMax = 30 * dt;
+    var passoMax = 26 * dt;
     var d = meta - f.a;
     if(d > passoMax) d = passoMax; else if(d < -passoMax) d = -passoMax;
     f.w = d / dt;
     f.a += d;
+    var salendo = (f.lato === "sx" ? d < -0.0005 : d > 0.0005);
+    if(salendo) f.carica = 1;
+    else if(f.carica > 0) f.carica -= dt / 0.13;
+    if(f.carica < 0) f.carica = 0;
   });
 
   // il conto si muove
@@ -533,7 +561,7 @@ function passo(dt){
 
     // ── moto ──
     b.vy += GRAV * dt;
-    b.vx *= 0.9993; b.vy *= 0.9993;
+    b.vx *= 0.99985; b.vy *= 0.99985;   // ~7% al secondo, prima era 29%
     if(G.scossa > 0){ b.vx += G.scossaX * dt * 60; }
 
     var vlen = Math.sqrt(b.vx*b.vx + b.vy*b.vy);
@@ -549,7 +577,7 @@ function passo(dt){
       var k1 = contattoSegmento(b, s);
       if(k1){
         if(s.tipo === "fionda"){
-          rispondi(b, k1, 0.30, 340);
+          rispondi(b, sbanda(k1, 0.14), 0.30, 300 + Math.random()*90);
           segna(75);
           beep(300, 0.05, "square", 0.04);
           fionde.forEach(function(fi){
@@ -564,7 +592,7 @@ function passo(dt){
     // ── paletti ──
     for(var p2 = 0; p2 < perni.length; p2++){
       var k2 = contattoCerchio(b, perni[p2]);
-      if(k2) rispondi(b, k2, perni[p2].rimb, 0);
+      if(k2) rispondi(b, sbanda(k2, perni[p2].tipo === "tagliere" ? 0.09 : 0.13), perni[p2].rimb, 0);
     }
 
     // ── calici ──
@@ -572,7 +600,7 @@ function passo(dt){
       var c2 = respinte[r2];
       var k3 = contattoCerchio(b, c2);
       if(k3){
-        rispondi(b, k3, 0.42, 430);
+        rispondi(b, sbanda(k3, 0.16), 0.42, 400 + Math.random()*90);
         colpisciCalice(c2, b);
       }
     }
@@ -599,9 +627,14 @@ function passo(dt){
         var rvx = b.vx - vpx, rvy = b.vy - vpy;
         var vn2 = rvx*k5.nx + rvy*k5.ny;
         if(vn2 < 0){
-          var j = -(1 + 0.42) * vn2;
+          var j = -(1 + 0.55) * vn2;
           b.vx += j * k5.nx; b.vy += j * k5.ny;
-          if(Math.abs(f3.w) > 6){ beep(210, 0.04, "square", 0.045); }
+        }
+        if(f3.carica > 0.02){
+          var spinta = 900 * f3.carica;
+          b.vx += k5.nx * spinta; b.vy += k5.ny * spinta;
+          f3.carica = 0;
+          beep(200, 0.05, "square", 0.05);
         }
       }
     }
@@ -670,7 +703,7 @@ function passo(dt){
     if(b.x > 462 && b.y > 815 && Math.abs(b.vy) < 70 && G.fase === "gioco" && palle.length === 1){
       G.fase = "carica"; G.carica = 0; G.caricando = false;
       b.attesa = true; b.vx = 0; b.vy = 0; b.x = 480;
-      document.getElementById("hint").textContent = "Il tappo è tornato indietro. Tieni premuto in basso e rilancia.";
+      document.getElementById("hint").textContent = "Il tappo è tornato indietro, rilancia.";
       continue;
     }
 
@@ -711,7 +744,7 @@ function preparaLancio(){
   var b = nuovoTappo(480, 828, 0, 0);
   b.attesa = true;
   palle = [b];
-  document.getElementById("hint").textContent = "Tieni premuto in basso per caricare, molla per lanciare.";
+  document.getElementById("hint").textContent = "Tieni premuto in basso, poi molla per lanciare.";
 }
 
 function lancia(){
@@ -719,12 +752,12 @@ function lancia(){
   var b = palle[0];
   if(!b) return;
   b.attesa = false;
-  b.vy = -(640 + G.carica * 1060);
+  b.vy = -(640 + G.carica * 1060) * (0.985 + Math.random()*0.03);
   b.vx = 0;
   G.fase = "gioco";
   G.carica = 0;
   beep(320, 0.16, "sawtooth", 0.06);
-  document.getElementById("hint").textContent = "Frecce o metà schermo per le alette. Freccia giù per spingere il tavolo.";
+  document.getElementById("hint").textContent = "Metà schermo, o frecce, per le alette.";
 }
 
 function finePartita(){
@@ -931,29 +964,29 @@ function disegnaTagliere(){
 
   ombra(4, 8, 14, 0.6, function(){
     cx.fillStyle = "#3a2110";
-    cx.beginPath(); cx.arc(0, 0, 86, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(0, 0, 80, 0, Math.PI*2); cx.fill();
   });
 
   // spessore del legno
   cx.fillStyle = "#38200f";
-  cx.beginPath(); cx.arc(0, 5, 86, 0, Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(0, 5, 80, 0, Math.PI*2); cx.fill();
 
   var g = cx.createRadialGradient(-26, -30, 8, 0, 0, 90);
   g.addColorStop(0, "#8a5730"); g.addColorStop(0.68, C.legno); g.addColorStop(1, "#40240f");
   cx.fillStyle = g;
-  cx.beginPath(); cx.arc(0, 0, 84, 0, Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(0, 0, 78, 0, Math.PI*2); cx.fill();
 
   cx.save();
-  cx.beginPath(); cx.arc(0, 0, 84, 0, Math.PI*2); cx.clip();
+  cx.beginPath(); cx.arc(0, 0, 78, 0, Math.PI*2); cx.clip();
   cx.strokeStyle = "rgba(58,32,14,.45)"; cx.lineWidth = 1.4;
   for(var i = -4; i <= 4; i++){
     cx.beginPath(); cx.arc(-150 + i*9, 0, 160, -0.5, 0.5); cx.stroke();
   }
   cx.restore();
 
-  cx.beginPath(); cx.arc(0, 0, 84, 0, Math.PI*2); contorno(2.4);
+  cx.beginPath(); cx.arc(0, 0, 78, 0, Math.PI*2); contorno(2.4);
   cx.strokeStyle = "rgba(255,222,180,.16)"; cx.lineWidth = 2;
-  cx.beginPath(); cx.arc(0, 0, 80, Math.PI*1.05, Math.PI*1.75); cx.stroke();
+  cx.beginPath(); cx.arc(0, 0, 74, Math.PI*1.05, Math.PI*1.75); cx.stroke();
 
   // le fette, che compaiono davvero sul tagliere
   fette.forEach(function(f, i){
@@ -978,23 +1011,6 @@ function disegnaTagliere(){
   });
 
   var n = fette.filter(function(f){ return f.on; }).length;
-
-  // il coltello appoggiato sul tagliere
-  cx.save();
-  cx.rotate(-0.42);
-  cx.fillStyle = "rgba(6,2,5,.4)";
-  cx.beginPath(); cx.ellipse(2, 46, 44, 7, 0, 0, Math.PI*2); cx.fill();
-  // lama
-  cx.beginPath();
-  cx.moveTo(-46, 40); cx.lineTo(12, 36); cx.lineTo(16, 44); cx.lineTo(-46, 48); cx.closePath();
-  cx.fillStyle = grad(-46,36,-46,48,"#e9e2d4","#9a9284"); cx.fill();
-  contorno(1.2);
-  // manico
-  cx.beginPath();
-  cx.moveTo(16, 36); cx.lineTo(48, 35); cx.lineTo(48, 47); cx.lineTo(16, 46); cx.closePath();
-  cx.fillStyle = grad(16,35,16,47,"#7a4a22","#3d2210"); cx.fill();
-  contorno(1.2);
-  cx.restore();
 
   // alone caldo quando il tagliere si riempie
   if(n > 0){
@@ -1453,12 +1469,15 @@ function disegnaMuri(){
   rail(456, 856, 504, 856, 5);
   rail(16, 838, 128, 876, 6);
   rail(456, 838, 344, 876, 6);
-  rail(76, 700, 116, 826, 5);
-  rail(444, 700, 404, 826, 5);
+  rail(54, 640, 76, 782, 5);
+  rail(418, 640, 396, 782, 5);
+  rail(76, 782, 140, 792, 5);
+  rail(396, 782, 332, 792, 5);
   railArco(ARCO.cx, ARCO.cy, ARCO.rOut, 180, 360, 6);
   railArco(ARCO.cx, ARCO.cy, ARCO.rIn, 180, 360, 6);
 
   perni.forEach(function(p){
+    if(p.tipo === "tagliere") return;
     cx.save();
     cx.fillStyle = "rgba(6,2,5,.55)";
     cx.beginPath(); cx.ellipse(p.x+2, p.y+5, p.r, p.r*0.85, 0, 0, Math.PI*2); cx.fill();
@@ -1554,25 +1573,94 @@ function disegnaDettagli(){
   });
   cx.restore();
 
-  // il tovagliolo piegato sotto le alette
+}
+
+
+
+/* ── inserti: le placchette traslucide incassate nel piano che si accendono.
+      Sono la firma di un flipper vero, prima non c'erano. ───────────────── */
+function inserto(x, y, w, h, acceso, tinta, testo, forma){
   cx.save();
-  cx.translate(236, 846); cx.rotate(0.02);
-  ombra(2, 5, 8, 0.5, function(){
-    cx.fillStyle = "#2b0f1c";
+  cx.translate(x, y);
+  function sagoma(o){
+    o = o || 0;
     cx.beginPath();
-    cx.moveTo(-104, 14); cx.lineTo(-62, -12); cx.lineTo(-20, 12);
-    cx.lineTo(20, -12); cx.lineTo(62, 12); cx.lineTo(104, -12);
-    cx.lineTo(104, 30); cx.lineTo(-104, 30); cx.closePath(); cx.fill();
-  });
-  var g = cx.createLinearGradient(0, -12, 0, 30);
-  g.addColorStop(0, "#9c3d5f"); g.addColorStop(1, "#4a1a30");
+    if(forma === "freccia"){
+      cx.moveTo(0, -h/2 - o);
+      cx.lineTo(w/2 + o, 0);
+      cx.lineTo(w/4 + o/2, 0);
+      cx.lineTo(w/4 + o/2, h/2 + o);
+      cx.lineTo(-w/4 - o/2, h/2 + o);
+      cx.lineTo(-w/4 - o/2, 0);
+      cx.lineTo(-w/2 - o, 0);
+      cx.closePath();
+    } else if(forma === "tondo"){
+      cx.arc(0, 0, w/2 + o, 0, Math.PI*2);
+    } else {
+      var r = Math.min(h/2 + o, 7);
+      if(cx.roundRect) cx.roundRect(-w/2 - o, -h/2 - o, w + 2*o, h + 2*o, r);
+      else cx.rect(-w/2 - o, -h/2 - o, w + 2*o, h + 2*o);
+    }
+  }
+  cx.fillStyle = "rgba(10,4,8,.75)"; sagoma(2.4); cx.fill();
+  if(acceso){ cx.shadowColor = tinta; cx.shadowBlur = 16; }
+  var g = cx.createLinearGradient(0, -h/2, 0, h/2);
+  if(acceso){ g.addColorStop(0, "#fff6e0"); g.addColorStop(1, tinta); }
+  else { g.addColorStop(0, "rgba(244,237,226,.16)"); g.addColorStop(1, "rgba(244,237,226,.07)"); }
+  cx.fillStyle = g; sagoma(0); cx.fill();
+  cx.shadowBlur = 0;
+  cx.strokeStyle = acceso ? "rgba(255,250,235,.7)" : "rgba(244,237,226,.24)";
+  cx.lineWidth = 1.2; sagoma(0); cx.stroke();
+  if(testo){
+    cx.fillStyle = acceso ? "rgba(30,10,18,.85)" : "rgba(244,237,226,.4)";
+    cx.font = "700 " + Math.max(7, Math.round(h*0.46)) + "px -apple-system, Helvetica, sans-serif";
+    cx.textAlign = "center"; cx.textBaseline = "middle";
+    cx.fillText(testo, 0, forma === "freccia" ? h*0.22 : 0.5);
+  }
+  cx.restore();
+}
+
+function disegnaInserti(){
+  var acc = G.rampeAccese > 0;
+  cx.save(); cx.translate(126, 596); cx.rotate(-0.5);
+  inserto(0, 0, 26, 34, acc, "#e8b24a", null, "freccia"); cx.restore();
+  cx.save(); cx.translate(354, 570); cx.rotate(0.5);
+  inserto(0, 0, 26, 34, acc, "#e8b24a", null, "freccia"); cx.restore();
+
+  bersagli.forEach(function(t){ inserto(t.x, 250, 22, 13, t.giu, "#be6b34", t.lettera, null); });
+
+  var fatti = luciArco.filter(function(l){ return l.on; }).length;
+  inserto(96, 300, 34, 15, fatti > 0, "#2e7e77", "GIRO", null);
+  inserto(376, 300, 34, 15, fatti > 2, "#2e7e77", "GIRO", null);
+
+  inserto(170, 748, 40, 15, G.molt > 1, "#8d3355", "x" + G.molt, null);
+  inserto(302, 748, 46, 15, G.salvagente, "#2f6b46", "SALVA", null);
+  inserto(236, 736, 54, 15, fette.filter(function(f){ return f.on; }).length >= 8,
+          "#e8b24a", "TAGLIERE", null);
+}
+
+/* ── il grembiule di metallo in fondo, come sui flipper veri ─────────────── */
+function disegnaApron(){
+  cx.save();
+  var y0 = 842;
+  var g = cx.createLinearGradient(0, y0, 0, H-14);
+  g.addColorStop(0, "#5e564a"); g.addColorStop(0.35, "#38322b"); g.addColorStop(1, "#1d1a16");
   cx.fillStyle = g;
   cx.beginPath();
-  cx.moveTo(-104, 14); cx.lineTo(-62, -12); cx.lineTo(-20, 12);
-  cx.lineTo(20, -12); cx.lineTo(62, 12); cx.lineTo(104, -12);
-  cx.lineTo(104, 30); cx.lineTo(-104, 30); cx.closePath();
-  cx.fill();
-  cx.strokeStyle = "rgba(255,222,232,.24)"; cx.lineWidth = 1.4; cx.stroke();
+  cx.moveTo(16, H-14); cx.lineTo(16, y0 + 16);
+  cx.lineTo(150, y0); cx.lineTo(222, y0 + 12);
+  cx.lineTo(250, y0 + 12); cx.lineTo(322, y0);
+  cx.lineTo(504, y0 + 16); cx.lineTo(504, H-14);
+  cx.closePath(); cx.fill();
+  cx.strokeStyle = "rgba(255,246,230,.28)"; cx.lineWidth = 1.6;
+  cx.beginPath();
+  cx.moveTo(16, y0 + 16); cx.lineTo(150, y0); cx.lineTo(222, y0 + 12);
+  cx.lineTo(250, y0 + 12); cx.lineTo(322, y0); cx.lineTo(504, y0 + 16);
+  cx.stroke();
+  cx.fillStyle = "rgba(141,51,85,.55)";
+  cx.beginPath();
+  cx.moveTo(196, y0 + 13); cx.lineTo(236, y0 + 2); cx.lineTo(276, y0 + 13);
+  cx.lineTo(276, y0 + 24); cx.lineTo(196, y0 + 24); cx.closePath(); cx.fill();
   cx.restore();
 }
 
@@ -1582,11 +1670,11 @@ function disegnaTarghe(){
   cx.font = "700 13px Georgia, serif";
   cx.textBaseline = "alphabetic";
   cx.fillStyle = "rgba(10,4,8,.6)";
-  cx.textAlign = "left";  cx.fillText("VINICOLO", 44, 845);
-  cx.textAlign = "right"; cx.fillText("SMCV", 446, 845);
+  cx.textAlign = "left";  cx.fillText("VINICOLO", 46, 856);
+  cx.textAlign = "right"; cx.fillText("SMCV", 474, 856);
   cx.fillStyle = "rgba(190,107,52,.85)";
-  cx.textAlign = "left";  cx.fillText("VINICOLO", 44, 844);
-  cx.textAlign = "right"; cx.fillText("SMCV", 446, 844);
+  cx.textAlign = "left";  cx.fillText("VINICOLO", 46, 855);
+  cx.textAlign = "right"; cx.fillText("SMCV", 474, 855);
   cx.restore();
 }
 
@@ -1639,6 +1727,7 @@ function disegna(){
   disegnaCanali();
   disegnaLampade();
   disegnaTarga();
+  disegnaInserti();
   disegnaDettagli();
   disegnaMuri();
   disegnaLuciArco();
@@ -1651,6 +1740,7 @@ function disegna(){
   disegnaLanciatore();
   disegnaAlette();
   palle.forEach(disegnaTappo);
+  disegnaApron();
   disegnaMessaggi();
   disegnaTarghe();
   cx.restore();
@@ -1797,7 +1887,10 @@ requestAnimationFrame(ciclo);
 
 // esposto per le prove automatiche
 window.__flipper = {G:G, palle:function(){return palle;}, alette:alette, nuovaPartita:nuovaPartita,
-                    lancia:lancia, W:W, H:H, muri:function(){return muri;}};
+                    lancia:lancia, W:W, H:H,
+                    muri:function(){return muri;}, perni:function(){return perni;},
+                    calici:function(){return respinte;}, bersagli:function(){return bersagli;},
+                    RAGGIO:11};
 })();
 </script>
 </body>
