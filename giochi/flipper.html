@@ -14,7 +14,7 @@
     align-items:center;height:100svh;overflow:hidden;user-select:none;-webkit-user-select:none;
     padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
   a{color:var(--gold)}
-  .top{width:100%;max-width:560px;height:46px;flex:0 0 46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+  .viaBack{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
   .back{font-size:.82rem;text-decoration:none;color:var(--cream);opacity:.75}
   .mute{background:none;border:1px solid rgba(244,237,226,.25);color:var(--cream);width:34px;height:34px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.85}
   .score{width:100%;max-width:520px;height:56px;flex:0 0 56px;padding:0 14px 8px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;overflow:hidden}
@@ -26,11 +26,10 @@
   .tappi{display:flex;gap:4px;align-items:center;height:16px}
   .tappo{width:11px;height:14px;border-radius:3px;background:linear-gradient(180deg,#d8a46a,#a9713c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.3)}
   .tappo.off{opacity:.2}
-  .stage{position:relative;flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;width:100%;padding:0}
+  .stage{position:relative;flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:0}
   canvas{display:block;width:auto;height:auto;max-width:100%;max-height:100%;touch-action:none;
     border-radius:8px;box-shadow:0 10px 38px rgba(0,0,0,.6)}
-  .hint{width:100%;max-width:560px;height:38px;flex:0 0 38px;display:flex;align-items:center;justify-content:center;
-    text-align:center;font-size:.75rem;line-height:1.2;opacity:.65;padding:0 14px}
+  
   .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
     background:rgba(18,7,4,.93);backdrop-filter:blur(3px);border-radius:10px;padding:26px;gap:14px}
   .overlay.hide{display:none}
@@ -46,13 +45,9 @@
 </style>
 </head>
 <body>
-  <div class="top">
-    <a class="back" href="../index.html#giochi">&#8592; Vinicolo</a>
-    <button class="mute" id="mute" aria-label="Audio"></button>
-  </div>
-
+  <a class="viaBack" id="indietro" href="../index.html#giochi" aria-hidden="true">&#8592; Vinicolo</a>
   <div class="stage">
-    <canvas id="game" width="520" height="1024"></canvas>
+    <canvas id="game" width="520" height="1000"></canvas>
 
     <div class="overlay" id="overlay">
       <h1>Il flipper <em>della tavola</em></h1>
@@ -69,7 +64,6 @@
     </div>
   </div>
 
-  <div class="hint" id="hint">Tieni premuto in basso, poi molla per lanciare.</div>
 
 <script>
 (function(){
@@ -83,7 +77,7 @@
    ══════════════════════════════════════════════════════════════════ */
 
 var W = 520, H = 880;          // il tavolo, in unita' sue
-var HTELA = 1024;              // la tela: tavolo piu' cruscotto in cima
+var HTELA = 1000;              // la tela: tavolo piu' cruscotto in cima
 var PIANO_Y = HTELA - H;       // dove comincia il tavolo dentro la tela
 var cv = document.getElementById("game");
 var cx = cv.getContext("2d");
@@ -124,15 +118,25 @@ function beep(f, d, t, g){
     o.stop(AC.currentTime + d);
   }catch(e){}
 }
-function renderMute(){
-  document.getElementById("mute").innerHTML = muted
-    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f4ede2" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9H4z"/><line x1="17" y1="9" x2="23" y2="15"/><line x1="23" y1="9" x2="17" y2="15"/></svg>'
-    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f4ede2" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8a5 5 0 0 1 0 8"/></svg>';
+function renderMute(){ /* l'icona si disegna nel cruscotto */ }
+
+/* i due pulsanti del cruscotto, in coordinate della tela */
+var BOTTONI = {
+  indietro: {x:14, y:10, w:112, h:34},
+  audio:    {x:462, y:10, w:44, h:34}
+};
+function bottonePremuto(cxTela, cyTela){
+  for(var k in BOTTONI){
+    var b = BOTTONI[k];
+    if(cxTela >= b.x && cxTela <= b.x + b.w && cyTela >= b.y && cyTela <= b.y + b.h) return k;
+  }
+  return null;
 }
-document.getElementById("mute").addEventListener("click", function(){
-  muted = !muted; localStorage.setItem("vin_mute", muted ? "1" : "0"); renderMute();
-});
-renderMute();
+function usaBottone(k){
+  if(k === "indietro"){ document.getElementById("indietro").click(); return true; }
+  if(k === "audio"){ muted = !muted; localStorage.setItem("vin_mute", muted ? "1" : "0"); return true; }
+  return false;
+}
 
 /* ══════════════════════════════════════════════════════════════════
    IL TAVOLO
@@ -303,6 +307,7 @@ var G = {
   vinoFatti:0, salvagente:false, salvagenteUsato:false,
   rampeAccese:0, contoT:0, conto:null,
   tilt:false, spinte:0, spintaT:0, scossa:0, orbita:true,
+  hint:"Tieni premuto in basso, poi molla per lanciare.",
   messaggi:[], lampo:0
 };
 
@@ -687,7 +692,7 @@ function passo(dt){
     if(b.x > 462 && b.y > 815 && Math.abs(b.vy) < 70 && G.fase === "gioco" && palle.length === 1){
       G.fase = "carica"; G.carica = 0; G.caricando = false;
       b.attesa = true; b.vx = 0; b.vy = 0; b.x = 480;
-      document.getElementById("hint").textContent = "Il tappo è tornato indietro, rilancia.";
+      G.hint = "Il tappo è tornato indietro, rilancia.";
       continue;
     }
 
@@ -728,7 +733,7 @@ function preparaLancio(){
   var b = nuovoTappo(480, 828, 0, 0);
   b.attesa = true;
   palle = [b];
-  document.getElementById("hint").textContent = "Tieni premuto in basso, poi molla per lanciare.";
+  G.hint = "Tieni premuto in basso, poi molla per lanciare.";
 }
 
 function lancia(){
@@ -741,7 +746,7 @@ function lancia(){
   G.fase = "gioco";
   G.carica = 0;
   beep(320, 0.16, "sawtooth", 0.06);
-  document.getElementById("hint").textContent = "Metà schermo, o frecce, per le alette.";
+  G.hint = "Metà schermo, o frecce, per le alette.";
 }
 
 function finePartita(){
@@ -1710,36 +1715,59 @@ function disegnaMessaggi(){
 function disegnaCruscotto(){
   var h = PIANO_Y;
   cx.save();
-  // legno della cassa
   var g = cx.createLinearGradient(0, 0, 0, h);
-  g.addColorStop(0, "#2e1620"); g.addColorStop(1, "#190c12");
+  g.addColorStop(0, "#2e1620"); g.addColorStop(1, "#180b11");
   cx.fillStyle = g; cx.fillRect(0, 0, W, h);
 
-  // pannello interno
-  var px = 26, py = 16, pw = W - 52, ph = h - 30;
+  // ── riga alta: indietro, suggerimento, audio ──
+  var b = BOTTONI.indietro;
+  cx.fillStyle = "rgba(244,237,226,.7)";
+  cx.font = "500 14px -apple-system, Helvetica, sans-serif";
+  cx.textAlign = "left"; cx.textBaseline = "middle";
+  cx.fillText("\u2190  Vinicolo", b.x + 4, b.y + b.h/2);
+
+  var a = BOTTONI.audio;
+  cx.save();
+  cx.translate(a.x + a.w/2, a.y + a.h/2);
+  cx.strokeStyle = "rgba(244,237,226,.7)"; cx.lineWidth = 1.8;
+  cx.lineJoin = "round"; cx.lineCap = "round";
+  cx.beginPath();
+  cx.moveTo(-8, -3); cx.lineTo(-4, -3); cx.lineTo(1, -7); cx.lineTo(1, 7); cx.lineTo(-4, 3); cx.lineTo(-8, 3);
+  cx.closePath(); cx.stroke();
+  if(muted){
+    cx.beginPath(); cx.moveTo(4, -4); cx.lineTo(10, 4); cx.moveTo(10, -4); cx.lineTo(4, 4); cx.stroke();
+  } else {
+    cx.beginPath(); cx.arc(3, 0, 5, -0.9, 0.9); cx.stroke();
+    cx.beginPath(); cx.arc(3, 0, 8.5, -0.8, 0.8); cx.stroke();
+  }
+  cx.restore();
+
+  if(G.hint){
+    cx.fillStyle = "rgba(244,237,226,.45)";
+    cx.font = "400 11px -apple-system, Helvetica, sans-serif";
+    cx.textAlign = "center";
+    cx.fillText(G.hint, W/2, 27);
+  }
+
+  // ── pannello del punteggio ──
+  var px = 14, py = 50, pw = W - 28, ph = h - 60;
   var gp = cx.createLinearGradient(0, py, 0, py + ph);
-  gp.addColorStop(0, "#4c1e36"); gp.addColorStop(1, "#2b1020");
+  gp.addColorStop(0, "#4c1e36"); gp.addColorStop(1, "#2a1020");
   cx.fillStyle = gp;
   cx.beginPath();
-  if(cx.roundRect) cx.roundRect(px, py, pw, ph, 10); else cx.rect(px, py, pw, ph);
+  if(cx.roundRect) cx.roundRect(px, py, pw, ph, 9); else cx.rect(px, py, pw, ph);
   cx.fill();
-  cx.strokeStyle = "rgba(232,178,74,.55)"; cx.lineWidth = 2; cx.stroke();
-  cx.strokeStyle = "rgba(255,240,210,.16)"; cx.lineWidth = 1;
-  cx.beginPath();
-  if(cx.roundRect) cx.roundRect(px+4, py+4, pw-8, ph-8, 7); else cx.rect(px+4, py+4, pw-8, ph-8);
-  cx.stroke();
+  cx.strokeStyle = "rgba(232,178,74,.5)"; cx.lineWidth = 1.8; cx.stroke();
 
   cx.textBaseline = "alphabetic";
-  // punti, grandi
   cx.textAlign = "left";
-  cx.fillStyle = "rgba(244,237,226,.55)";
-  cx.font = "600 10px -apple-system, Helvetica, sans-serif";
-  cx.fillText("P U N T I", px + 20, py + 30);
+  cx.fillStyle = "rgba(244,237,226,.5)";
+  cx.font = "600 9px -apple-system, Helvetica, sans-serif";
+  cx.fillText("P U N T I", px + 16, py + 18);
   cx.fillStyle = C.oroChiaro;
-  cx.font = "700 42px Georgia, serif";
-  cx.fillText(G.punti.toLocaleString("it-IT"), px + 18, py + 76);
+  cx.font = "700 32px Georgia, serif";
+  cx.fillText(G.punti.toLocaleString("it-IT"), px + 14, py + 48);
 
-  // stato al centro
   var etichetta, valore;
   if(G.tilt){ etichetta = "TAVOLO"; valore = "TILT"; }
   else if(palle.length > 1){ etichetta = "IN GIOCO"; valore = palle.length + " TAPPI"; }
@@ -1748,32 +1776,24 @@ function disegnaCruscotto(){
   cx.textAlign = "center";
   cx.fillStyle = "rgba(244,237,226,.5)";
   cx.font = "600 9px -apple-system, Helvetica, sans-serif";
-  cx.fillText(etichetta, W/2 + 42, py + 30);
+  cx.fillText(etichetta, W/2 + 24, py + 18);
   cx.fillStyle = G.tilt ? "#e0668f" : C.crema;
-  cx.font = "700 17px Georgia, serif";
-  cx.fillText(valore, W/2 + 42, py + 52);
+  cx.font = "700 16px Georgia, serif";
+  cx.fillText(valore, W/2 + 24, py + 40);
 
-  // record e tappi
   cx.textAlign = "right";
   cx.fillStyle = "rgba(244,237,226,.5)";
   cx.font = "600 9px -apple-system, Helvetica, sans-serif";
-  cx.fillText("RECORD " + G.record.toLocaleString("it-IT"), px + pw - 20, py + 30);
+  cx.fillText("RECORD " + G.record.toLocaleString("it-IT"), px + pw - 16, py + 18);
   for(var i = 0; i < 3; i++){
-    var tx = px + pw - 20 - i*17, acceso = i < G.tappi;
-    cx.save();
-    cx.fillStyle = acceso ? sfera(tx-5, py + 48, 6, "#f0d49a", "#8c5c26") : "rgba(244,237,226,.14)";
-    cx.beginPath(); cx.arc(tx - 5, py + 48, 6, 0, Math.PI*2); cx.fill();
+    var tx = px + pw - 22 - i*18, acceso = i < G.tappi;
+    cx.fillStyle = acceso ? sfera(tx, py + 36, 6.5, "#f0d49a", "#8c5c26") : "rgba(244,237,226,.13)";
+    cx.beginPath(); cx.arc(tx, py + 36, 6.5, 0, Math.PI*2); cx.fill();
     if(acceso){
-      cx.strokeStyle = "rgba(76,28,50,.7)"; cx.lineWidth = 1.2;
-      cx.beginPath(); cx.moveTo(tx-7.5, py+46); cx.lineTo(tx-5, py+51); cx.lineTo(tx-2.5, py+46); cx.stroke();
+      cx.strokeStyle = "rgba(76,28,50,.75)"; cx.lineWidth = 1.3; cx.lineCap = "round";
+      cx.beginPath(); cx.moveTo(tx-2.6, py+34); cx.lineTo(tx, py+39); cx.lineTo(tx+2.6, py+34); cx.stroke();
     }
-    cx.restore();
   }
-  cx.textAlign = "right";
-  cx.fillStyle = "rgba(244,237,226,.4)";
-  cx.font = "600 8px -apple-system, Helvetica, sans-serif";
-  cx.fillText("TAPPI", px + pw - 20, py + 70);
-
   cx.restore();
 }
 
@@ -1873,6 +1893,8 @@ cv.addEventListener("touchstart", function(e){
   e.preventDefault();
   for(var i = 0; i < e.changedTouches.length; i++){
     var t = e.changedTouches[i], p = puntoTocco(t);
+    var bot = bottonePremuto(p.x * W, p.y * HTELA);
+    if(bot){ usaBottone(bot); tocchi[t.identifier] = "bottone"; continue; }
     if(G.fase === "carica" && p.y > 0.80){ G.caricando = true; tocchi[t.identifier] = "carica"; }
     else if(p.x < 0.5){ premiAletta("sx", true); tocchi[t.identifier] = "sx"; }
     else { premiAletta("dx", true); tocchi[t.identifier] = "dx"; }
@@ -1882,6 +1904,7 @@ cv.addEventListener("touchend", function(e){
   e.preventDefault();
   for(var i = 0; i < e.changedTouches.length; i++){
     var id = e.changedTouches[i].identifier, k = tocchi[id];
+    if(k === "bottone"){ delete tocchi[id]; continue; }
     if(k === "carica"){ G.caricando = false; lancia(); }
     else if(k === "sx") premiAletta("sx", false);
     else if(k === "dx") premiAletta("dx", false);
@@ -1893,14 +1916,18 @@ cv.addEventListener("touchcancel", function(e){
   G.caricando = false; tocchi = {};
 }, {passive:false});
 
+var premutoBottone = false;
 cv.addEventListener("mousedown", function(e){
   var r = cv.getBoundingClientRect();
   var px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+  var bot = bottonePremuto(px * W, py * HTELA);
+  if(bot){ premutoBottone = true; usaBottone(bot); return; }
   if(G.fase === "carica" && py > 0.80){ G.caricando = true; }
   else if(px < 0.5) premiAletta("sx", true);
   else premiAletta("dx", true);
 });
 document.addEventListener("mouseup", function(){
+  if(premutoBottone){ premutoBottone = false; return; }
   premiAletta("sx", false); premiAletta("dx", false);
   if(G.fase === "carica" && G.caricando){ G.caricando = false; lancia(); }
 });
